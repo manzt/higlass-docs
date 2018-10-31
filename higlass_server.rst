@@ -9,7 +9,7 @@ Configuration
 -------------
 
 The HiGlass server accepts a number of options to customize its use.
-Most of these options are set using environment variables before the
+Some of these options are set using environment variables before the
 server is started:
 
 .. code-block:: bash
@@ -25,6 +25,41 @@ it's not specified, then no in-memory tile caching will be performed.
 ``REDIS_PORT`` - The port for redis server to use for tile caching. If it's not
 set and a host is provided, the default port will be used.
 
+Additionally, the following settings are set via ``config.json`` (see ``config.json.sample`` as an example):
+
+``DEBUG`` - If ``true`` the server is started in debug mode.
+
+``INSTALLED_APPS`` - A list of django extension.
+
+``LOG_LEVEL_CONSOLE`` - Define the console log level.
+
+``LOG_LEVEL_FILE`` - Define the file log level.
+
+``LOG_LEVEL_DJANGO`` - Define the django log level.
+
+``LOG_LEVEL_CHROMS`` - Define the chroms log level.
+
+``LOG_LEVEL_FRAGMENTS`` - Define the fragments log level.
+
+``LOG_LEVEL_TILESETS`` - Define the tilesets log level.
+
+``UPLOAD_ENABLED`` - If ``true`` the HiGlass server accepts any kinds of uploads.
+
+``PUBLIC_UPLOAD_ENABLED`` - If ``true`` the HiGlass server accepts public uploads.
+
+``REDIS_HOST`` - IP address of your Redis server.
+
+``REDIS_PORT`` - Port number of your Redis server.
+
+``SNIPPET_HIC_MAX_OUT_DIM`` - If specified it limits the maximum size (in pixels) of the longer side of a Hi-C snippet.
+
+``SNIPPET_HIC_MAX_DATA_DIM`` - If specified it limits the maximum size (in bins) of the longer side of the snippet the is pulled out of a cooler file.
+
+``SNIPPET_IMG_MAX_OUT_DIM`` - If specified it limits the maximum size (in pixels) of the longer side of an image snippet.
+
+``SNIPPET_OSM_MAX_DATA_DIM`` - If specified it limits the maximum size (in pixels) of the longer side of the OSM tiles that are pulled out for getting the image snippet.
+
+``SNIPPET_IMT_MAX_DATA_DIM`` - If specified it limits the maximum size (in pixels) of the longer side of the image tiles that are pulled out for getting the image snippet.
 
 
 Development
