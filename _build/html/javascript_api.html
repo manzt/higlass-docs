@@ -388,7 +388,7 @@ of this component</p>
 
 <dl class="function">
 <dt id="zoomTo">
-<code class="descname">zoomTo</code><span class="sig-paren">(</span><em>viewUid</em>, <em>start1Abs</em>, <em>end1Abs</em>, <em>start2Abs</em>, <em>end2Abs</em>, <em>animateTime</em><span class="sig-paren">)</span><a class="headerlink" href="#zoomTo" title="Permalink to this definition">¶</a></dt>
+<code class="descname">zoomTo</code><span class="sig-paren">(</span><em>viewUid</em>, <em>start1Abs</em>, <em>end1Abs</em>, <em>start2Abs</em>, <em>end2Abs</em><span class="sig-paren">)</span><a class="headerlink" href="#zoomTo" title="Permalink to this definition">¶</a></dt>
 <dd><p>Change the current view port to a certain data location.  When <code class="docutils literal"><span class="pre">animateTime</span></code> is
 greater than 0, animate the transition.
 If working with genomic data, a chromosome info file will need to be used in
@@ -405,7 +405,6 @@ to each other.</p>
 <li><strong>end1Abs</strong> (<em>Number</em>) – The x end position</li>
 <li><strong>start2Abs</strong> (<em>Number</em>) – (optional) The y start position. If not specified start1Abs will be used.</li>
 <li><strong>end2Abs</strong> (<em>Number</em>) – (optional) The y end position. If not specified end1Abs will be used</li>
-<li><strong>animateTime</strong> (<em>Number</em>) – The time to spend zooming to the specified location</li>
 </ul>
 </td>
 </tr>
@@ -413,7 +412,7 @@ to each other.</p>
 </table>
 <p><strong>Examples:</strong></p>
 <div class="highlight-js"><div class="highlight"><pre><span></span><span class="c1">// Absolute coordinates</span>
-<span class="nx">hgApi</span><span class="p">.</span><span class="nx">zoomTo</span><span class="p">(</span><span class="s1">&#39;view1&#39;</span><span class="p">,</span> <span class="mi">1000000</span><span class="p">,</span> <span class="mi">1100000</span><span class="p">,</span> <span class="mi">2000000</span><span class="p">,</span> <span class="mi">2100000</span><span class="p">,</span> <span class="mi">500</span><span class="p">);</span>
+<span class="nx">hgApi</span><span class="p">.</span><span class="nx">zoomTo</span><span class="p">(</span><span class="s1">&#39;view1&#39;</span><span class="p">,</span> <span class="mi">1000000</span><span class="p">,</span> <span class="mi">1000000</span><span class="p">,</span> <span class="mi">2000000</span><span class="p">,</span> <span class="mi">2000000</span><span class="p">,</span> <span class="mi">500</span><span class="p">);</span>
 <span class="c1">// Chromosomal coordinates</span>
 <span class="nx">hglib</span>
   <span class="c1">// Pass in the URL of your chrom sizes</span>
@@ -692,7 +691,13 @@ and the related genomic location.</p>
 <li class="toctree-l2"><a class="reference internal" href="view_config.html#upload-a-viewconf-to-the-server">Upload a viewconf to the server</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="developer.html">Developer Documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="developer.html">Developer Documentation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="developer.html#testing">Testing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="developer.html#documentation">Documentation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="developer.html#linting">Linting</a></li>
+<li class="toctree-l2"><a class="reference internal" href="developer.html#branching">Branching</a></li>
+</ul>
+</li>
 </ul>
 
 <div class="relations">

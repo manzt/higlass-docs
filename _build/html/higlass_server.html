@@ -58,7 +58,7 @@
 <div class="section" id="configuration">
 <h2>Configuration<a class="headerlink" href="#configuration" title="Permalink to this headline">¶</a></h2>
 <p>The HiGlass server accepts a number of options to customize its use.
-Most of these options are set using environment variables before the
+Some of these options are set using environment variables before the
 server is started:</p>
 <div class="highlight-bash"><div class="highlight"><pre><span></span><span class="nb">export</span> <span class="nv">OPTION</span><span class="o">=</span>value<span class="p">;</span> python manage.py runserver
 </pre></div>
@@ -69,6 +69,24 @@ look for the database and the media directories.</p>
 it’s not specified, then no in-memory tile caching will be performed.</p>
 <p><code class="docutils literal"><span class="pre">REDIS_PORT</span></code> - The port for redis server to use for tile caching. If it’s not
 set and a host is provided, the default port will be used.</p>
+<p>Additionally, the following settings are set via <code class="docutils literal"><span class="pre">config.json</span></code> (see <code class="docutils literal"><span class="pre">config.json.sample</span></code> as an example):</p>
+<p><code class="docutils literal"><span class="pre">DEBUG</span></code> - If <code class="docutils literal"><span class="pre">true</span></code> the server is started in debug mode.</p>
+<p><code class="docutils literal"><span class="pre">INSTALLED_APPS</span></code> - A list of django extension.</p>
+<p><code class="docutils literal"><span class="pre">LOG_LEVEL_CONSOLE</span></code> - Define the console log level.</p>
+<p><code class="docutils literal"><span class="pre">LOG_LEVEL_FILE</span></code> - Define the file log level.</p>
+<p><code class="docutils literal"><span class="pre">LOG_LEVEL_DJANGO</span></code> - Define the django log level.</p>
+<p><code class="docutils literal"><span class="pre">LOG_LEVEL_CHROMS</span></code> - Define the chroms log level.</p>
+<p><code class="docutils literal"><span class="pre">LOG_LEVEL_FRAGMENTS</span></code> - Define the fragments log level.</p>
+<p><code class="docutils literal"><span class="pre">LOG_LEVEL_TILESETS</span></code> - Define the tilesets log level.</p>
+<p><code class="docutils literal"><span class="pre">UPLOAD_ENABLED</span></code> - If <code class="docutils literal"><span class="pre">true</span></code> the HiGlass server accepts any kinds of uploads.</p>
+<p><code class="docutils literal"><span class="pre">PUBLIC_UPLOAD_ENABLED</span></code> - If <code class="docutils literal"><span class="pre">true</span></code> the HiGlass server accepts public uploads.</p>
+<p><code class="docutils literal"><span class="pre">REDIS_HOST</span></code> - IP address of your Redis server.</p>
+<p><code class="docutils literal"><span class="pre">REDIS_PORT</span></code> - Port number of your Redis server.</p>
+<p><code class="docutils literal"><span class="pre">SNIPPET_HIC_MAX_OUT_DIM</span></code> - If specified it limits the maximum size (in pixels) of the longer side of a Hi-C snippet.</p>
+<p><code class="docutils literal"><span class="pre">SNIPPET_HIC_MAX_DATA_DIM</span></code> - If specified it limits the maximum size (in bins) of the longer side of the snippet the is pulled out of a cooler file.</p>
+<p><code class="docutils literal"><span class="pre">SNIPPET_IMG_MAX_OUT_DIM</span></code> - If specified it limits the maximum size (in pixels) of the longer side of an image snippet.</p>
+<p><code class="docutils literal"><span class="pre">SNIPPET_OSM_MAX_DATA_DIM</span></code> - If specified it limits the maximum size (in pixels) of the longer side of the OSM tiles that are pulled out for getting the image snippet.</p>
+<p><code class="docutils literal"><span class="pre">SNIPPET_IMT_MAX_DATA_DIM</span></code> - If specified it limits the maximum size (in pixels) of the longer side of the image tiles that are pulled out for getting the image snippet.</p>
 </div>
 <div class="section" id="development">
 <h2>Development<a class="headerlink" href="#development" title="Permalink to this headline">¶</a></h2>
@@ -244,7 +262,13 @@ added to the server:</p>
 <li class="toctree-l2"><a class="reference internal" href="view_config.html#upload-a-viewconf-to-the-server">Upload a viewconf to the server</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="developer.html">Developer Documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="developer.html">Developer Documentation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="developer.html#testing">Testing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="developer.html#documentation">Documentation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="developer.html#linting">Linting</a></li>
+<li class="toctree-l2"><a class="reference internal" href="developer.html#branching">Branching</a></li>
+</ul>
+</li>
 </ul>
 
 <div class="relations">
