@@ -26,7 +26,7 @@ The main documentation repository is: `https://github.com/higlass/higlass-docs <
 Documentation for new features should go into: `https://github.com/higlass/higlass-docs-dev <https://github.com/higlass/higlass-docs-dev>`_
 
 Documentation can also be added to the ``docs`` folder in: `https://github.com/higlass/higlass <https://github.com/higlass/higlass>`_. The
-docs folder there is a git subtree pointing to ``higlass-docs``.
+docs folder there should be a git subtree pointing to ``higlass-docs-dev``.
 
 Linting
 -------
