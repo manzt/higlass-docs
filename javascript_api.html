@@ -1,0 +1,913 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>Javascript API &#8212; HiGlass v1.0 documentation</title>
+    <link rel="stylesheet" href="_static/higlass.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Python API" href="python_api.html" />
+    <link rel="prev" title="Tutorial" href="tutorial.html" />
+  <!-- Global site tag (gtag.js) - Google Analytics -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=UA-77756807-1"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+
+    gtag('config', 'UA-77756807-1');
+  </script>
+  
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <div class="section" id="javascript-api">
+<h1>Javascript API<a class="headerlink" href="#javascript-api" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="overview">
+<h2>Overview<a class="headerlink" href="#overview" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="embedding-higlass-in-web-page">
+<h3>Embedding HiGlass in web page<a class="headerlink" href="#embedding-higlass-in-web-page" title="Permalink to this headline">¶</a></h3>
+<p>HiGlass can be included in any web page by including the relevant
+javascript and css files:</p>
+<div class="highlight-html notranslate"><div class="highlight"><pre><span></span><span class="p">&lt;</span><span class="nt">link</span> <span class="na">rel</span><span class="o">=</span><span class="s">&quot;stylesheet&quot;</span> <span class="na">href</span><span class="o">=</span><span class="s">&quot;https://unpkg.com/higlass@1.2.6/dist/hglib.css&quot;</span> <span class="na">type</span><span class="o">=</span><span class="s">&quot;text/css&quot;</span><span class="p">&gt;</span>
+<span class="p">&lt;</span><span class="nt">link</span> <span class="na">rel</span><span class="o">=</span><span class="s">&quot;stylesheet&quot;</span> <span class="na">href</span><span class="o">=</span><span class="s">&quot;//maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css&quot;</span> <span class="na">type</span><span class="o">=</span><span class="s">&quot;text/css&quot;</span><span class="p">&gt;</span>
+
+
+<span class="p">&lt;</span><span class="nt">script</span> <span class="na">crossorigin</span> <span class="na">src</span><span class="o">=</span><span class="s">&quot;https://unpkg.com/react@16/umd/react.development.js&quot;</span><span class="p">&gt;&lt;/</span><span class="nt">script</span><span class="p">&gt;</span>
+<span class="p">&lt;</span><span class="nt">script</span> <span class="na">crossorigin</span> <span class="na">src</span><span class="o">=</span><span class="s">&quot;https://unpkg.com/react-dom@16/umd/react-dom.development.js&quot;</span><span class="p">&gt;&lt;/</span><span class="nt">script</span><span class="p">&gt;</span>
+<span class="p">&lt;</span><span class="nt">script</span> <span class="na">src</span><span class="o">=</span><span class="s">&quot;https://cdnjs.cloudflare.com/ajax/libs/pixi.js/4.8.1/pixi.min.js&quot;</span><span class="p">&gt;&lt;/</span><span class="nt">script</span><span class="p">&gt;</span>
+<span class="p">&lt;</span><span class="nt">script</span> <span class="na">src</span><span class="o">=</span><span class="s">&quot;https://cdnjs.cloudflare.com/ajax/libs/react-bootstrap/0.32.1/react-bootstrap.min.js&quot;</span><span class="p">&gt;&lt;/</span><span class="nt">script</span><span class="p">&gt;</span>
+
+<span class="p">&lt;</span><span class="nt">script</span> <span class="na">src</span><span class="o">=</span><span class="s">&quot;https://unpkg.com/higlass@1.2.6/dist/hglib[.min].js&quot;</span><span class="p">&gt;&lt;/</span><span class="nt">script</span><span class="p">&gt;</span>
+</pre></div>
+</div>
+<p>External tracks should be included <strong>before</strong> the hglib.js import:</p>
+<div class="highlight-html notranslate"><div class="highlight"><pre><span></span><span class="p">&lt;</span><span class="nt">script</span> <span class="na">src</span><span class="o">=</span><span class="s">&quot;https://unpkg.com/higlass-multivec@0.1.10/dist/higlass-multivec.js&quot;</span><span class="p">&gt;&lt;/</span><span class="nt">script</span><span class="p">&gt;</span>
+</pre></div>
+</div>
+<p>Instructions for instantiating the component and interacting with it are in the
+<a class="reference external" href="javascript_api.html#api-functions">Public API section</a>.</p>
+<div class="section" id="available-endpoints">
+<h4>Available endpoints<a class="headerlink" href="#available-endpoints" title="Permalink to this headline">¶</a></h4>
+<div class="highlight-javascript notranslate"><div class="highlight"><pre><span></span><span class="kr">import</span> <span class="p">{</span> <span class="nx">HiGlassComponent</span><span class="p">,</span> <span class="nx">ChromosomeInfo</span><span class="p">,</span> <span class="nx">viewer</span> <span class="p">}</span> <span class="nx">from</span> <span class="s1">&#39;higlass&#39;</span><span class="p">;</span>
+</pre></div>
+</div>
+<p>HiGlass exports three endpoints for your convenience. <code class="docutils literal notranslate"><span class="pre">viewer</span></code> is the main
+endpoint to create a new HiGlass component. <code class="docutils literal notranslate"><span class="pre">HiGlassComponent</span></code> can be used
+to integrate HiGlass in your React application. <code class="docutils literal notranslate"><span class="pre">ChromosomeInfo</span></code> is a class
+for converting absolute coordinates to chromosome coordinates. It’s used
+internally and made available to convert absolute range selection into
+chromosome range selections.</p>
+</div>
+<div class="section" id="creating-an-inline-higlass-component">
+<h4>Creating an inline HiGlass component<a class="headerlink" href="#creating-an-inline-higlass-component" title="Permalink to this headline">¶</a></h4>
+<div class="highlight-javascript notranslate"><div class="highlight"><pre><span></span><span class="kr">const</span> <span class="nx">hgv</span> <span class="o">=</span> <span class="nx">hglib</span><span class="p">.</span><span class="nx">viewer</span><span class="p">(</span><span class="nx">element</span><span class="p">,</span> <span class="nx">config</span><span class="p">,</span> <span class="nx">options</span><span class="p">);</span>
+</pre></div>
+</div>
+<p>Create a new HiGlass viewer within a web page. This initializes a
+HiGlassComponent inside the element <code class="docutils literal notranslate"><span class="pre">element</span></code> with a viewconfig passed in as
+<code class="docutils literal notranslate"><span class="pre">config</span></code>. If <code class="docutils literal notranslate"><span class="pre">config</span></code> is a string, it is interpreted as a url and used to
+try to fetch a remote viewconfig.</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">options</span></code> parameter can currently only specify the <code class="docutils literal notranslate"><span class="pre">bounded</span></code> property
+which tells the HiGlass component to fill all the space in the containing
+element. Note that if <code class="docutils literal notranslate"><span class="pre">bounded</span></code> is set to true, then <code class="docutils literal notranslate"><span class="pre">element</span></code> must have a
+fixed height.</p>
+<p>The function returns an instance of the public API of a HiGlass component.</p>
+<p>A full example of an inline HiGlass component can be found in the <a class="reference external" href="https://github.com/higlass/higlass/blob/develop/app/api.html">HiGlass
+GitHub repository</a>.</p>
+<p><strong>Example</strong></p>
+<div class="highlight-javascript notranslate"><div class="highlight"><pre><span></span><span class="kr">const</span> <span class="nx">hgv</span> <span class="o">=</span> <span class="nx">hglib</span><span class="p">.</span><span class="nx">viewer</span><span class="p">(</span>
+  <span class="nb">document</span><span class="p">.</span><span class="nx">getElementById</span><span class="p">(</span><span class="s1">&#39;development-demo&#39;</span><span class="p">),</span>
+  <span class="nx">testViewConfig</span><span class="p">,</span>
+  <span class="p">{</span> <span class="nx">bounded</span><span class="o">:</span> <span class="kc">true</span> <span class="p">},</span>
+<span class="p">);</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="creating-a-higlass-component-in-your-react-app">
+<h4>Creating a HiGlass component in your React app<a class="headerlink" href="#creating-a-higlass-component-in-your-react-app" title="Permalink to this headline">¶</a></h4>
+<div class="highlight-javascript notranslate"><div class="highlight"><pre><span></span><span class="o">&lt;</span><span class="nx">HiGlassComponent</span>
+  <span class="nx">options</span><span class="o">=</span><span class="p">{</span><span class="nx">options</span><span class="p">}</span>
+  <span class="nx">viewConfig</span><span class="o">=</span><span class="p">{</span><span class="nx">viewConfig</span><span class="p">}</span>
+<span class="o">&gt;</span>
+</pre></div>
+</div>
+<p>Use the <code class="docutils literal notranslate"><span class="pre">HiGlassComponent</span></code> to create a HiGlass instance in react. The
+<code class="docutils literal notranslate"><span class="pre">options</span></code> prop is the same as explained above.</p>
+<p><strong>Example</strong></p>
+<div class="highlight-javascript notranslate"><div class="highlight"><pre><span></span><span class="kr">import</span> <span class="p">{</span> <span class="nx">HiGlassComponent</span> <span class="p">}</span> <span class="nx">from</span> <span class="s1">&#39;higlass&#39;</span><span class="p">;</span>
+
+<span class="kr">const</span> <span class="nx">HiGlass</span> <span class="o">=</span> <span class="nx">props</span> <span class="p">=&gt;</span> <span class="o">&lt;</span><span class="nx">HiGlassComponent</span>
+  <span class="nx">ref</span><span class="o">=</span><span class="p">{</span><span class="nx">props</span><span class="p">.</span><span class="nx">onRef</span><span class="p">}</span>
+  <span class="nx">options</span><span class="o">=</span><span class="p">{</span><span class="nx">props</span><span class="p">.</span><span class="nx">options</span><span class="p">}</span>
+  <span class="nx">viewConfig</span><span class="o">=</span><span class="p">{</span><span class="nx">props</span><span class="p">.</span><span class="nx">viewConfig</span><span class="p">}</span>
+<span class="o">&gt;</span>
+
+<span class="kr">export</span> <span class="k">default</span> <span class="nx">HiGlass</span><span class="p">;</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="obtaining-ordered-chromosome-info">
+<h4>Obtaining ordered chromosome info<a class="headerlink" href="#obtaining-ordered-chromosome-info" title="Permalink to this headline">¶</a></h4>
+<p>HiGlass provides an API for obtaining information about chromosomes
+and the order they are listed in a chromSizes file:</p>
+<div class="highlight-javascript notranslate"><div class="highlight"><pre><span></span><span class="kr">import</span> <span class="p">{</span> <span class="nx">ChromosomeInfo</span> <span class="p">}</span> <span class="nx">from</span> <span class="s1">&#39;higlass&#39;</span><span class="p">;</span>
+
+<span class="kr">const</span> <span class="nx">chromInfo</span> <span class="o">=</span> <span class="nx">ChromosomeInfo</span><span class="p">(</span>
+  <span class="s1">&#39;http://higlass.io/api/v1/chrom-sizes/?id=Ajn_ttUUQbqgtOD4nOt-IA&#39;</span><span class="p">,</span>
+  <span class="p">(</span><span class="nx">chromInfo</span><span class="p">)</span> <span class="p">=&gt;</span> <span class="p">{</span> <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s1">&#39;chromInfo:&#39;</span><span class="p">,</span> <span class="nx">chromInfo</span><span class="p">);</span> <span class="p">});</span>
+</pre></div>
+</div>
+<p>This will return a data structure with information about the chromosomes
+listed:</p>
+<div class="highlight-javascript notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+  <span class="nx">chrPositions</span><span class="o">:</span> <span class="p">{</span>
+    <span class="nx">chr1</span> <span class="o">:</span> <span class="p">{</span><span class="nx">id</span><span class="o">:</span> <span class="mi">0</span><span class="p">,</span> <span class="nx">chr</span><span class="o">:</span> <span class="s2">&quot;chr1&quot;</span><span class="p">,</span> <span class="nx">pos</span><span class="o">:</span> <span class="mi">0</span><span class="p">},</span>
+    <span class="nx">chr2</span> <span class="o">:</span> <span class="p">{</span><span class="nx">id</span><span class="o">:</span> <span class="mi">1</span><span class="p">,</span> <span class="nx">chr</span><span class="o">:</span> <span class="s2">&quot;chr2&quot;</span><span class="p">,</span> <span class="nx">pos</span><span class="o">:</span> <span class="mi">249250621</span><span class="p">}</span> <span class="p">,</span>
+    <span class="p">...</span>
+  <span class="p">},</span>
+  <span class="nx">chromLengths</span><span class="o">:</span> <span class="p">{</span>
+    <span class="nx">chr1</span><span class="o">:</span> <span class="s2">&quot;249250621&quot;</span><span class="p">,</span>
+    <span class="nx">chr2</span><span class="o">:</span> <span class="s2">&quot;243199373&quot;</span><span class="p">,</span>
+    <span class="p">...</span>
+  <span class="p">},</span>
+  <span class="nx">cumPositions</span><span class="o">:</span> <span class="p">[</span>
+    <span class="p">{</span><span class="nx">id</span><span class="o">:</span> <span class="mi">0</span><span class="p">,</span> <span class="nx">chr</span><span class="o">:</span> <span class="s2">&quot;chr1&quot;</span><span class="p">,</span> <span class="nx">pos</span><span class="o">:</span> <span class="mi">0</span><span class="p">},</span>
+    <span class="p">{</span><span class="nx">id</span><span class="o">:</span> <span class="mi">1</span><span class="p">,</span> <span class="nx">chr</span><span class="o">:</span> <span class="s2">&quot;chr2&quot;</span><span class="p">,</span> <span class="nx">pos</span><span class="o">:</span> <span class="mi">249250621</span><span class="p">},</span>
+    <span class="p">...</span>
+   <span class="p">]</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p><strong>Convert absolute to chromosomal coordinates:</strong></p>
+<div class="highlight-javascript notranslate"><div class="highlight"><pre><span></span><span class="nx">absPos</span> <span class="o">=</span> <span class="mi">257893</span><span class="p">;</span>
+<span class="nx">chromPos</span> <span class="o">=</span> <span class="nx">chromInfo</span><span class="p">.</span><span class="nx">absToChr</span><span class="p">(</span><span class="nx">absPos</span><span class="p">);</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+<div class="section" id="api-functions">
+<h2>API Functions<a class="headerlink" href="#api-functions" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="viewer">
+<code class="descname">viewer</code><span class="sig-paren">(</span><em>element</em>, <em>viewConfig</em>, <em>options</em><span class="sig-paren">)</span><a class="headerlink" href="#viewer" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create a HiGlass component.</p>
+<p>In addition to the parameters below, a number of extra options can be passed
+using the <strong>options</strong> parameter:</p>
+<ul class="simple">
+<li><strong>authToken</strong> <em>(string)</em> - An auth token to be included with every tile request
+(e.g. <code class="docutils literal notranslate"><span class="pre">JWT</span> <span class="pre">xyz</span></code>)</li>
+<li><strong>bounded</strong> <em>(bool)</em> - A boolean specifying whether the component should be sized
+to fit within the enclosing div [default=false]. If it is false, then the component
+will grow as needed to fit the tracks within it.</li>
+<li><strong>editable</strong> <em>(bool)</em> - Can the layout be changed? If false, the view headers will
+be hidden. This can also be specified in the viewconfig using the <code class="docutils literal notranslate"><span class="pre">editable</span></code> option.
+The value passed here overrides the value in the viewconf. [default=true]</li>
+<li><strong>defaultTrackOptions</strong> <em>(dict)</em> - Specify a set of default options that will be used for</li>
+</ul>
+<blockquote>
+<div>newly added tracks. These can be broken down into two types: <cite>all</cite> - affecting all
+all track types and <cite>trackSpecific</cite> which will affect only some track types. See the
+example below for a concrete demonstration.</div></blockquote>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Arguments:</th><td class="field-body"><ul class="first simple">
+<li><strong>element</strong> (<em>Object</em>) – DOM element the HiGlass component should be attached to.</li>
+<li><strong>viewConfig</strong> (<em>Object|String</em>) – The viewconfig to load. If this parameter is a string it will be interpreted as a url from which to retrieve the viewconf. If it is a dictionary it will be loaded as is.</li>
+<li><strong>options</strong> (<em>Object</em>) – Dictionary of public options. See the description above for a list of available values.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last"><strong>Object</strong> – Newly created HiGlass component.</p>
+</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Examples:</strong></p>
+<div class="highlight-js notranslate"><div class="highlight"><pre><span></span><span class="kr">const</span> <span class="nx">hgv</span> <span class="o">=</span> <span class="nx">hglib</span><span class="p">.</span><span class="nx">viewer</span><span class="p">(</span>
+ <span class="nb">document</span><span class="p">.</span><span class="nx">getElementById</span><span class="p">(</span><span class="s1">&#39;development-demo&#39;</span><span class="p">),</span>
+ <span class="nx">testViewConfig</span><span class="p">,</span>
+ <span class="p">{</span> <span class="nx">bounded</span><span class="o">:</span> <span class="kc">true</span><span class="p">,</span>
+  <span class="nx">defaultTrackOptions</span><span class="o">:</span> <span class="p">{</span>
+    <span class="nx">all</span><span class="o">:</span> <span class="p">{</span>
+      <span class="nx">showTooltip</span><span class="o">:</span> <span class="kc">true</span><span class="p">,</span>
+    <span class="p">},</span>
+    <span class="nx">trackSpecific</span><span class="o">:</span> <span class="p">{</span>
+     <span class="s1">&#39;heatmap&#39;</span><span class="o">:</span> <span class="p">{</span>
+       <span class="nx">showTooltip</span><span class="o">:</span> <span class="kc">false</span><span class="p">,</span>
+     <span class="p">}</span>
+    <span class="p">}</span>
+  <span class="p">}</span>
+<span class="p">});</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="reload">
+<code class="descname">reload</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#reload" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reload all of the tiles</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="setViewConfig">
+<code class="descname">setViewConfig</code><span class="sig-paren">(</span><em>newViewConfig</em><span class="sig-paren">)</span><a class="headerlink" href="#setViewConfig" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set a new view config to define the layout and data
+of this component</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Arguments:</th><td class="field-body"><ul class="first simple">
+<li><strong>newViewConfig</strong> (<em>obj</em>) – A JSON object that defines the state of the HiGlassComponent</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last"><strong>Promise</strong> – dataLoaded A promise that resolves when all of the data for this viewconfig is loaded</p>
+</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Examples:</strong></p>
+<div class="highlight-js notranslate"><div class="highlight"><pre><span></span><span class="kr">const</span> <span class="nx">p</span> <span class="o">=</span> <span class="nx">hgv</span><span class="p">.</span><span class="nx">setViewConfig</span><span class="p">(</span><span class="nx">newViewConfig</span><span class="p">);</span>
+<span class="nx">p</span><span class="p">.</span><span class="nx">then</span><span class="p">(()</span> <span class="p">=&gt;</span> <span class="p">{</span>
+  <span class="c1">// the initial set of tiles has been loaded</span>
+<span class="p">});</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="getMinMaxValue">
+<code class="descname">getMinMaxValue</code><span class="sig-paren">(</span><em>viewId</em>, <em>trackId</em>, <em>ignoreOffScreenValues=false</em>, <em>ignoreFixedScale=false</em><span class="sig-paren">)</span><a class="headerlink" href="#getMinMaxValue" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the minimum and maximum visible values for a given track.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Arguments:</th><td class="field-body"><ul class="first simple">
+<li><strong>viewId</strong> (<em>string</em>) – The id of the view containing the track.</li>
+<li><strong>trackId</strong> (<em>string</em>) – The id of the track to query.</li>
+<li><strong>ignoreOffScreenValues</strong> (<em>bool</em>) – If <code class="docutils literal notranslate"><span class="pre">true</span></code> only truly visible values are considered. Otherwise the values of visible tiles are used. Not that considering only the truly visible values results in a roughly 10x slowdown (from 0.1 to 1 millisecond).</li>
+<li><strong>ignoreFixedScale</strong> (<em>bool</em>) – If <code class="docutils literal notranslate"><span class="pre">true</span></code> potentially fixed scaled values are ignored. I.e., if the absolute range is <code class="docutils literal notranslate"><span class="pre">[1,</span> <span class="pre">18]</span></code> but you have fixed the output range to <code class="docutils literal notranslate"><span class="pre">[4,</span> <span class="pre">5]</span></code> you would normally retrieve <code class="docutils literal notranslate"><span class="pre">[4,</span> <span class="pre">5]</span></code>. Having this option set to <code class="docutils literal notranslate"><span class="pre">true</span></code> retrieves the absolute <code class="docutils literal notranslate"><span class="pre">[1,</span> <span class="pre">18]</span></code> range.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last"><strong>Array</strong> – The minimum and maximum value</p>
+</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Examples:</strong></p>
+<div class="highlight-js notranslate"><div class="highlight"><pre><span></span><span class="kr">const</span> <span class="p">[</span><span class="nx">minVal</span><span class="p">,</span> <span class="nx">maxVal</span><span class="p">]</span> <span class="o">=</span> <span class="nx">hgv</span><span class="p">.</span><span class="nx">getMinMaxValue</span><span class="p">(</span><span class="s1">&#39;myView&#39;</span><span class="p">,</span> <span class="s1">&#39;myTrack&#39;</span><span class="p">);</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="getRangeSelection">
+<code class="descname">getRangeSelection</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#getRangeSelection" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the current range selection</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><strong>Array</strong> – The current range selection</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="getTrackObject">
+<code class="descname">getTrackObject</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#getTrackObject" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the track’s javascript object. This is useful for subscribing to
+data events (dataChanged)</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="getViewConfig">
+<code class="descname">getViewConfig</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#getViewConfig" title="Permalink to this definition">¶</a></dt>
+<dd><p>Retrieve the visible viewconf.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">(Object) A JSON object describing the visible views</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="shareViewConfigAsLink">
+<code class="descname">shareViewConfigAsLink</code><span class="sig-paren">(</span><em>url</em><span class="sig-paren">)</span><a class="headerlink" href="#shareViewConfigAsLink" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generate a sharable link to the current view config. The <cite>url</cite> parameter should contain
+the API endpoint used to export the view link (e.g. ‘<a class="reference external" href="http://localhost:8989/api/v1/viewconfs">http://localhost:8989/api/v1/viewconfs</a>’).
+If it is not provided, the value is taken from the <cite>exportViewUrl</cite> value of the viewconf.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Arguments:</th><td class="field-body"><ul class="first simple">
+<li><strong>url</strong> (<em>string</em>) – Custom URL that should point to a higlass server’s view config endpoint, i.e., <cite>http://my-higlass-server.com/api/v1/viewconfs/</cite>.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last"><strong>Object</strong> – Promise resolving to the link ID and URL.</p>
+</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Examples:</strong></p>
+<div class="highlight-js notranslate"><div class="highlight"><pre><span></span><span class="nx">hgv</span><span class="p">.</span><span class="nx">shareViewConfigAsLink</span><span class="p">(</span><span class="s1">&#39;http://localhost:8989/api/v1/viewconfs&#39;</span><span class="p">)</span>
+<span class="p">.</span><span class="nx">then</span><span class="p">((</span><span class="nx">sharedViewConfig</span><span class="p">)</span> <span class="p">=&gt;</span> <span class="p">{</span>
+  <span class="kr">const</span> <span class="p">{</span> <span class="nx">id</span><span class="p">,</span> <span class="nx">url</span> <span class="p">}</span> <span class="o">=</span> <span class="nx">sharedViewConfig</span><span class="p">;</span>
+  <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="sb">`Shared view config (ID: </span><span class="si">${</span><span class="nx">id</span><span class="si">}</span><span class="sb">) is available at </span><span class="si">${</span><span class="nx">url</span><span class="si">}</span><span class="sb">`</span><span class="p">)</span>
+<span class="p">})</span>
+<span class="p">.</span><span class="k">catch</span><span class="p">((</span><span class="nx">err</span><span class="p">)</span> <span class="p">=&gt;</span> <span class="p">{</span> <span class="nx">console</span><span class="p">.</span><span class="nx">error</span><span class="p">(</span><span class="s1">&#39;Something did not work. Sorry&#39;</span><span class="p">,</span> <span class="nx">err</span><span class="p">);</span> <span class="p">})</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="zoomToDataExtent">
+<code class="descname">zoomToDataExtent</code><span class="sig-paren">(</span><em>viewUid</em><span class="sig-paren">)</span><a class="headerlink" href="#zoomToDataExtent" title="Permalink to this definition">¶</a></dt>
+<dd><p>Zoom so that the entirety of all the datasets in a view
+are visible.
+The passed in <code class="docutils literal notranslate"><span class="pre">viewUid</span></code> should refer to a view which is present. If it
+doesn’t, an exception will be thrown. Note that if this function is invoked
+directly after a HiGlass component is created, the information about the
+visible tilesets will not have been retrieved from the server and
+<code class="docutils literal notranslate"><span class="pre">zoomToDataExtent</span></code> will not work as expected. To ensure that the
+visible data has been loaded from the server, use the <code class="docutils literal notranslate"><span class="pre">setViewConfig</span></code>
+function and place <code class="docutils literal notranslate"><span class="pre">zoomToDataExtent</span></code> in the promise resolution.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Arguments:</th><td class="field-body"><ul class="first last simple">
+<li><strong>viewUid</strong> (<em>string</em>) – The view uid of the view to zoom</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Examples:</strong></p>
+<div class="highlight-js notranslate"><div class="highlight"><pre><span></span><span class="kr">const</span> <span class="nx">p</span> <span class="o">=</span> <span class="nx">hgv</span><span class="p">.</span><span class="nx">setViewConfig</span><span class="p">(</span><span class="nx">newViewConfig</span><span class="p">);</span>
+<span class="nx">p</span><span class="p">.</span><span class="nx">then</span><span class="p">(()</span> <span class="p">=&gt;</span> <span class="p">{</span>
+    <span class="nx">hgv</span><span class="p">.</span><span class="nx">zoomToDataExtent</span><span class="p">(</span><span class="s1">&#39;viewUid&#39;</span><span class="p">);</span>
+<span class="p">});</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="setViewConfig">
+<code class="descname">setViewConfig</code><span class="sig-paren">(</span><em>newViewConfig</em><span class="sig-paren">)</span><a class="headerlink" href="#setViewConfig" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set a new view config to define the layout and data
+of this component</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Arguments:</th><td class="field-body"><ul class="first simple">
+<li><strong>newViewConfig</strong> (<em>obj</em>) – A JSON object that defines the state of the HiGlassComponent</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last"><strong>Promise</strong> – dataLoaded A promise that resolves when all of the data for this viewconfig is loaded</p>
+</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Examples:</strong></p>
+<div class="highlight-js notranslate"><div class="highlight"><pre><span></span><span class="kr">const</span> <span class="nx">p</span> <span class="o">=</span> <span class="nx">hgv</span><span class="p">.</span><span class="nx">setViewConfig</span><span class="p">(</span><span class="nx">newViewConfig</span><span class="p">);</span>
+<span class="nx">p</span><span class="p">.</span><span class="nx">then</span><span class="p">(()</span> <span class="p">=&gt;</span> <span class="p">{</span>
+  <span class="c1">// the initial set of tiles has been loaded</span>
+<span class="p">});</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="zoomTo">
+<code class="descname">zoomTo</code><span class="sig-paren">(</span><em>viewUid</em>, <em>start1Abs</em>, <em>end1Abs</em>, <em>start2Abs</em>, <em>end2Abs</em>, <em>animateTime</em><span class="sig-paren">)</span><a class="headerlink" href="#zoomTo" title="Permalink to this definition">¶</a></dt>
+<dd><p>Change the current view port to a certain data location.  When <code class="docutils literal notranslate"><span class="pre">animateTime</span></code> is
+greater than 0, animate the transition.
+If working with genomic data, a chromosome info file will need to be used in
+order to calculate “data” coordinates from chromosome coordinates. “Data”
+coordinates are simply the coordinates as if the chromosomes were placed next
+to each other.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Arguments:</th><td class="field-body"><ul class="first last simple">
+<li><strong>viewUid</strong> (<em>string</em>) – The identifier of the view to zoom</li>
+<li><strong>start1Abs</strong> (<em>Number</em>) – The x start position</li>
+<li><strong>end1Abs</strong> (<em>Number</em>) – The x end position</li>
+<li><strong>start2Abs</strong> (<em>Number</em>) – (optional) The y start position. If not specified start1Abs will be used.</li>
+<li><strong>end2Abs</strong> (<em>Number</em>) – (optional) The y end position. If not specified end1Abs will be used</li>
+<li><strong>animateTime</strong> (<em>Number</em>) – The time to spend zooming to the specified location</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Examples:</strong></p>
+<div class="highlight-js notranslate"><div class="highlight"><pre><span></span><span class="c1">// Absolute coordinates</span>
+<span class="nx">hgApi</span><span class="p">.</span><span class="nx">zoomTo</span><span class="p">(</span><span class="s1">&#39;view1&#39;</span><span class="p">,</span> <span class="mi">1000000</span><span class="p">,</span> <span class="mi">1100000</span><span class="p">,</span> <span class="mi">2000000</span><span class="p">,</span> <span class="mi">2100000</span><span class="p">,</span> <span class="mi">500</span><span class="p">);</span>
+<span class="c1">// Chromosomal coordinates</span>
+<span class="nx">hglib</span>
+  <span class="c1">// Pass in the URL of your chrom sizes</span>
+  <span class="p">.</span><span class="nx">ChromosomeInfo</span><span class="p">(</span><span class="s1">&#39;//s3.amazonaws.com/pkerp/data/hg19/chromSizes.tsv&#39;</span><span class="p">)</span>
+  <span class="c1">// Now we can use the chromInfo object to convert</span>
+  <span class="p">.</span><span class="nx">then</span><span class="p">((</span><span class="nx">chromInfo</span><span class="p">)</span> <span class="p">=&gt;</span> <span class="p">{</span>
+    <span class="c1">// Go to PTEN</span>
+    <span class="nx">hgApi</span><span class="p">.</span><span class="nx">zoomTo</span><span class="p">(</span>
+      <span class="nx">viewConfig</span><span class="p">.</span><span class="nx">views</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="nx">uid</span><span class="p">,</span>
+      <span class="nx">chromInfo</span><span class="p">.</span><span class="nx">chrToAbs</span><span class="p">([</span><span class="s1">&#39;chr10&#39;</span><span class="p">,</span> <span class="mi">89596071</span><span class="p">]),</span>
+      <span class="nx">chromInfo</span><span class="p">.</span><span class="nx">chrToAbs</span><span class="p">([</span><span class="s1">&#39;chr10&#39;</span><span class="p">,</span> <span class="mi">89758810</span><span class="p">]),</span>
+      <span class="nx">chromInfo</span><span class="p">.</span><span class="nx">chrToAbs</span><span class="p">([</span><span class="s1">&#39;chr10&#39;</span><span class="p">,</span> <span class="mi">89596071</span><span class="p">]),</span>
+      <span class="nx">chromInfo</span><span class="p">.</span><span class="nx">chrToAbs</span><span class="p">([</span><span class="s1">&#39;chr10&#39;</span><span class="p">,</span> <span class="mi">89758810</span><span class="p">]),</span>
+      <span class="mi">2500</span>  <span class="c1">// Animation time</span>
+    <span class="p">);</span>
+  <span class="p">});</span>
+  <span class="c1">// Just in case, let us catch errors</span>
+  <span class="p">.</span><span class="k">catch</span><span class="p">(</span><span class="nx">error</span> <span class="p">=&gt;</span> <span class="nx">console</span><span class="p">.</span><span class="nx">error</span><span class="p">(</span><span class="s1">&#39;Oh boy...&#39;</span><span class="p">,</span> <span class="nx">error</span><span class="p">))</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="exportAsSvg">
+<code class="descname">exportAsSvg</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#exportAsSvg" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the current view as an SVG. Relies on all the tracks implementing
+their respective exportAsSVG methods.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><strong>string</strong> – An SVG string of the current view.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="exportAsPngBlobPromise">
+<code class="descname">exportAsPngBlobPromise</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#exportAsPngBlobPromise" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get a Promise which returns a Blob containing a PNG for the current view.
+It’s possible to get string of the PNG bytes from that:</p>
+<dl class="docutils">
+<dt>hgApi.exportAsPngBlobPromise().then(function(blob) {</dt>
+<dd><p class="first">var reader = new FileReader();
+reader.addEventListener(“loadend”, function() {</p>
+<blockquote>
+<div>var array = new Uint8Array(reader.result.slice(0,8));
+console.log(array);
+console.log(new TextDecoder(“iso-8859-2”).decode(array));</div></blockquote>
+<p class="last">});
+reader.readAsArrayBuffer(blob);</p>
+</dd>
+</dl>
+<p>});</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><strong>promise</strong> –</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="exportAsViewConfString">
+<code class="descname">exportAsViewConfString</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#exportAsViewConfString" title="Permalink to this definition">¶</a></dt>
+<dd><p>Export the current view as a Viewconf.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><strong>string</strong> – A stringified version of the current viewconf</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="shareViewConfigAsLink">
+<code class="descname">shareViewConfigAsLink</code><span class="sig-paren">(</span><em>url</em><span class="sig-paren">)</span><a class="headerlink" href="#shareViewConfigAsLink" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generate a sharable link to the current view config. The <cite>url</cite> parameter should contain
+the API endpoint used to export the view link (e.g. ‘<a class="reference external" href="http://localhost:8989/api/v1/viewconfs">http://localhost:8989/api/v1/viewconfs</a>’).
+If it is not provided, the value is taken from the <cite>exportViewUrl</cite> value of the viewconf.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Arguments:</th><td class="field-body"><ul class="first simple">
+<li><strong>url</strong> (<em>string</em>) – Custom URL that should point to a higlass server’s view config endpoint, i.e., <cite>http://my-higlass-server.com/api/v1/viewconfs/</cite>.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last"><strong>Object</strong> – Promise resolving to the link ID and URL.</p>
+</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Examples:</strong></p>
+<div class="highlight-js notranslate"><div class="highlight"><pre><span></span><span class="nx">hgv</span><span class="p">.</span><span class="nx">shareViewConfigAsLink</span><span class="p">(</span><span class="s1">&#39;http://localhost:8989/api/v1/viewconfs&#39;</span><span class="p">)</span>
+<span class="p">.</span><span class="nx">then</span><span class="p">((</span><span class="nx">sharedViewConfig</span><span class="p">)</span> <span class="p">=&gt;</span> <span class="p">{</span>
+  <span class="kr">const</span> <span class="p">{</span> <span class="nx">id</span><span class="p">,</span> <span class="nx">url</span> <span class="p">}</span> <span class="o">=</span> <span class="nx">sharedViewConfig</span><span class="p">;</span>
+  <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="sb">`Shared view config (ID: </span><span class="si">${</span><span class="nx">id</span><span class="si">}</span><span class="sb">) is available at </span><span class="si">${</span><span class="nx">url</span><span class="si">}</span><span class="sb">`</span><span class="p">)</span>
+<span class="p">})</span>
+<span class="p">.</span><span class="k">catch</span><span class="p">((</span><span class="nx">err</span><span class="p">)</span> <span class="p">=&gt;</span> <span class="p">{</span> <span class="nx">console</span><span class="p">.</span><span class="nx">error</span><span class="p">(</span><span class="s1">&#39;Something did not work. Sorry&#39;</span><span class="p">,</span> <span class="nx">err</span><span class="p">);</span> <span class="p">})</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="public.on">
+<code class="descclassname">public.</code><code class="descname">on</code><span class="sig-paren">(</span><em>event</em>, <em>callback</em>, <em>viewId</em><span class="sig-paren">)</span><a class="headerlink" href="#public.on" title="Permalink to this definition">¶</a></dt>
+<dd><p>Subscribe to events</p>
+<p>HiGlass exposes the following event, which one can subscribe to via this method:</p>
+<ul class="simple">
+<li>location</li>
+<li>rangeSelection</li>
+<li>viewConfig</li>
+<li>mouseMoveZoom</li>
+</ul>
+<p><strong>Event types</strong></p>
+<p><code class="docutils literal notranslate"><span class="pre">click</span></code>: Returns clicked objects. (Currently only clicks on 1D annotations are captured.)</p>
+<div class="highlight-javascript notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+  <span class="nx">type</span><span class="o">:</span> <span class="s1">&#39;annotation&#39;</span><span class="p">,</span>
+  <span class="nx">event</span><span class="o">:</span> <span class="p">{</span> <span class="p">...</span> <span class="p">},</span>
+  <span class="nx">payload</span><span class="o">:</span> <span class="p">[</span><span class="mi">230000000</span><span class="p">,</span> <span class="mi">561000000</span><span class="p">]</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">cursorLocation:</span></code> Returns an object describing the location under the cursor</p>
+<div class="highlight-javascript notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+    <span class="nx">absX</span><span class="o">:</span> <span class="mi">100</span><span class="p">,</span>
+    <span class="nx">absY</span><span class="o">:</span> <span class="mi">200</span><span class="p">,</span>
+    <span class="nx">relX</span><span class="o">:</span> <span class="mi">50</span><span class="p">,</span>
+    <span class="nx">relY</span><span class="o">:</span> <span class="mi">150</span><span class="p">,</span>
+    <span class="nx">relTrackX</span><span class="o">:</span> <span class="mi">50</span><span class="p">,</span>
+    <span class="nx">relTrackY</span><span class="o">:</span> <span class="mi">100</span><span class="p">,</span>
+    <span class="nx">dataX</span><span class="o">:</span> <span class="mi">10000</span><span class="p">,</span>
+    <span class="nx">dataY</span><span class="o">:</span> <span class="mi">123456</span><span class="p">,</span>
+    <span class="nx">isFrom2dTrack</span><span class="o">:</span> <span class="kc">false</span><span class="p">,</span>
+    <span class="nx">isFromVerticalTrack</span><span class="o">:</span> <span class="kc">false</span><span class="p">,</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">location:</span></code> Returns an object describing the visible region</p>
+<div class="highlight-javascript notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+    <span class="nx">xDomain</span><span class="o">:</span> <span class="p">[</span><span class="mf">1347750580.3773856</span><span class="p">,</span> <span class="mf">1948723324.787681</span><span class="p">],</span>
+    <span class="nx">xRange</span><span class="o">:</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">346</span><span class="p">],</span>
+    <span class="nx">yDomain</span><span class="o">:</span> <span class="p">[</span><span class="mf">1856870481.5391564</span><span class="p">,</span> <span class="mf">2407472678.0075483</span><span class="p">],</span>
+    <span class="nx">yRange</span><span class="o">:</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">317</span><span class="p">]</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">rangeSelection:</span></code> Returns a BED- (1D) or BEDPE (1d) array of the selected data and
+genomic range (if chrom-sizes are available)</p>
+<div class="highlight-javascript notranslate"><div class="highlight"><pre><span></span><span class="c1">// Global output</span>
+<span class="p">{</span>
+  <span class="nx">dataRange</span><span class="o">:</span> <span class="p">[...]</span>
+  <span class="nx">genomicRange</span><span class="o">:</span> <span class="p">[...]</span>
+<span class="p">}</span>
+
+<span class="c1">// 1D data range</span>
+<span class="p">[[</span><span class="mi">1218210862</span><span class="p">,</span> <span class="mi">1528541001</span><span class="p">],</span> <span class="kc">null</span><span class="p">]</span>
+
+<span class="c1">// 2D data range</span>
+<span class="p">[[</span><span class="mi">1218210862</span><span class="p">,</span> <span class="mi">1528541001</span><span class="p">],</span> <span class="p">[</span><span class="mi">1218210862</span><span class="p">,</span> <span class="mi">1528541001</span><span class="p">]]</span>
+
+<span class="c1">// 1D or BED-like array</span>
+<span class="p">[[</span><span class="s2">&quot;chr1&quot;</span><span class="p">,</span> <span class="mi">249200621</span><span class="p">,</span> <span class="s2">&quot;chrM&quot;</span><span class="p">,</span> <span class="mi">50000</span><span class="p">],</span> <span class="kc">null</span><span class="p">]</span>
+
+<span class="c1">// 2D or BEDPE-like array</span>
+<span class="p">[[</span><span class="s2">&quot;chr1&quot;</span><span class="p">,</span> <span class="mi">249200621</span><span class="p">,</span> <span class="s2">&quot;chr2&quot;</span><span class="p">,</span> <span class="mi">50000</span><span class="p">],</span> <span class="p">[</span><span class="s2">&quot;chr3&quot;</span><span class="p">,</span> <span class="mi">197972430</span><span class="p">,</span> <span class="s2">&quot;chr4&quot;</span><span class="p">,</span> <span class="mi">50000</span><span class="p">]]</span>
+</pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">viewConfig:</span></code> Returns the current view config.</p>
+<p><code class="docutils literal notranslate"><span class="pre">mouseMoveZoom:</span></code> Returns the location and data at the mouse cursor’s
+screen location.</p>
+<div class="highlight-javascript notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+  <span class="c1">// Float value of the hovering track</span>
+  <span class="nx">data</span><span class="p">,</span>
+  <span class="c1">// Absolute x screen position of the cursor in px</span>
+  <span class="nx">absX</span><span class="p">,</span>
+  <span class="c1">// Absolute y screen position of the cursor in px</span>
+  <span class="nx">absY</span><span class="p">,</span>
+  <span class="c1">// X screen position of the cursor in px relative to the track extent.</span>
+  <span class="nx">relX</span><span class="p">,</span>
+  <span class="c1">// Y screen position of the cursor in px relative to the track extent.</span>
+  <span class="nx">relY</span><span class="p">,</span>
+  <span class="c1">// Data x position of the cursor relative to the track&#39;s data.</span>
+  <span class="nx">dataX</span><span class="p">,</span>
+  <span class="c1">// Data y position of the cursor relative to the track&#39;s data.</span>
+  <span class="nx">dataY</span><span class="p">,</span>
+  <span class="c1">// Track orientation, i.e., &#39;1d-horizontal&#39;, &#39;1d-vertical&#39;, or &#39;2d&#39;</span>
+  <span class="nx">orientation</span><span class="o">:</span> <span class="s1">&#39;1d-horizontal&#39;</span><span class="p">,</span>
+
+  <span class="c1">// The following properties are only returned when hovering 2D tracks:</span>
+  <span class="c1">// Raw Float32Array</span>
+  <span class="nx">dataLens</span><span class="p">,</span>
+  <span class="c1">// Dimension of the lens, e.g., 3 (the lens is squared so `3` corresponds</span>
+  <span class="c1">// to a 3x3 matrix represented by an array of length 9)</span>
+  <span class="nx">dim</span><span class="p">,</span>
+  <span class="c1">// Function for converting the raw data values to rgb values</span>
+  <span class="nx">toRgb</span><span class="p">,</span>
+  <span class="c1">// Center position of the data or genomic position (as a BED array)</span>
+  <span class="nx">center</span><span class="p">,</span>
+  <span class="c1">// Range of the x data or genomic position (as a BEDPE array)</span>
+  <span class="nx">xRange</span><span class="p">,</span>
+  <span class="c1">// Range of the y data or genomic position (as a BEDPE array)</span>
+  <span class="nx">yRange</span><span class="p">,</span>
+  <span class="c1">// If `true` `center`, `xRange`, and `yRange` are given in genomic positions</span>
+  <span class="nx">isGenomicCoords</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Arguments:</th><td class="field-body"><ul class="first last simple">
+<li><strong>event</strong> (<em>string</em>) – One of the events described below</li>
+<li><strong>callback</strong> (<em>function</em>) – A callback to be called when the event occurs</li>
+<li><strong>viewId</strong> (<em>string</em>) – The view ID to listen to events</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Examples:</strong></p>
+<div class="highlight-js notranslate"><div class="highlight"><pre><span></span><span class="kd">let</span> <span class="nx">locationListenerId</span><span class="p">;</span>
+<span class="nx">hgv</span><span class="p">.</span><span class="nx">on</span><span class="p">(</span>
+  <span class="s1">&#39;location&#39;</span><span class="p">,</span>
+  <span class="nx">location</span> <span class="p">=&gt;</span> <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s1">&#39;Here we are:&#39;</span><span class="p">,</span> <span class="nx">location</span><span class="p">),</span>
+  <span class="s1">&#39;viewId1&#39;</span><span class="p">,</span>
+  <span class="nx">listenerId</span> <span class="p">=&gt;</span> <span class="nx">locationListenerId</span> <span class="o">=</span> <span class="nx">listenerId</span>
+<span class="p">);</span>
+
+<span class="kr">const</span> <span class="nx">rangeListenerId</span> <span class="o">=</span> <span class="nx">hgv</span><span class="p">.</span><span class="nx">on</span><span class="p">(</span>
+  <span class="s1">&#39;rangeSelection&#39;</span><span class="p">,</span>
+  <span class="nx">range</span> <span class="p">=&gt;</span> <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s1">&#39;Selected&#39;</span><span class="p">,</span> <span class="nx">range</span><span class="p">)</span>
+<span class="p">);</span>
+
+<span class="kr">const</span> <span class="nx">viewConfigListenerId</span> <span class="o">=</span> <span class="nx">hgv</span><span class="p">.</span><span class="nx">on</span><span class="p">(</span>
+  <span class="s1">&#39;viewConfig&#39;</span><span class="p">,</span>
+  <span class="nx">range</span> <span class="p">=&gt;</span> <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s1">&#39;Selected&#39;</span><span class="p">,</span> <span class="nx">range</span><span class="p">)</span>
+<span class="p">);</span>
+
+ <span class="kr">const</span> <span class="nx">mmz</span> <span class="o">=</span> <span class="nx">event</span> <span class="p">=&gt;</span> <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s1">&#39;Moved&#39;</span><span class="p">,</span> <span class="nx">event</span><span class="p">);</span>
+ <span class="nx">hgv</span><span class="p">.</span><span class="nx">on</span><span class="p">(</span><span class="s1">&#39;mouseMoveZoom&#39;</span><span class="p">,</span> <span class="nx">mmz</span><span class="p">);</span>
+</pre></div>
+</div>
+</dd></dl>
+
+</div>
+<div class="section" id="tiledpixitrack-functions">
+<h2>TiledPixiTrack Functions<a class="headerlink" href="#tiledpixitrack-functions" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="TiledPixiTrack">
+<em class="property">class </em><code class="descname">TiledPixiTrack</code><span class="sig-paren">(</span><em>(PIXI</em>, <em>(Object)</em>, <em>handleTilesetInfoReceived:</em>, <em>options</em>, <em>animate</em>, <em>onValueScaleChanged</em><span class="sig-paren">)</span><a class="headerlink" href="#TiledPixiTrack" title="Permalink to this definition">¶</a></dt>
+<dd><p>A track that must pull remote tiles</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Arguments:</th><td class="field-body"><ul class="first last simple">
+<li><strong>(PIXI.scene)</strong> – scene A PIXI.js scene to draw everything to.</li>
+<li><strong>(Object)</strong> (<em>Object</em>) – dataConfig: A data source. Usually a <a href="#id1"><span class="problematic" id="id2">``</span></a>`` Object.</li>
+<li><strong>handleTilesetInfoReceived:</strong> (<em>Object</em>) – A callback to do something once once the tileset info is received. Usually it registers some information about the tileset with its definition</li>
+<li><strong>options</strong> (<em>Object</em>) – The track’s options</li>
+<li><strong>animate</strong> (<em>function</em>) – A function to redraw this track. Typically called when an asynchronous event occurs (i.e. tiles loaded)</li>
+<li><strong>onValueScaleChanged</strong> (<em>function</em>) – The range of values has changed so we need to inform the higher ups that the value scale has changed. Only occurs on tracks with <code class="docutils literal notranslate"><span class="pre">dense</span></code> data.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<p>:type handleTilesetInfoReceived:: Object
+:type options: Object
+:type animate: function
+:type onValueScaleChanged: function</p>
+<dl class="function">
+<dt id="TiledPixiTrack.on">
+<code class="descclassname">TiledPixiTrack.</code><code class="descname">on</code><span class="sig-paren">(</span><em>event</em>, <em>callback</em><span class="sig-paren">)</span><a class="headerlink" href="#TiledPixiTrack.on" title="Permalink to this definition">¶</a></dt>
+<dd><p>Register an event listener for track events. Currently, the only supported
+event is <code class="docutils literal notranslate"><span class="pre">dataChanged</span></code>.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Arguments:</th><td class="field-body"><ul class="first last simple">
+<li><strong>event</strong> (<em>string</em>) – The event to listen for</li>
+<li><strong>callback</strong> (<em>function</em>) – The callback to call when the event occurs. The parameters for the event depend on the event called.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Examples:</strong></p>
+<div class="highlight-js notranslate"><div class="highlight"><pre><span></span><span class="p">..</span><span class="nx">code</span><span class="o">-</span><span class="nx">block</span><span class="o">::</span>
+
+ <span class="nx">trackObj</span><span class="p">.</span><span class="nx">on</span><span class="p">(</span><span class="s1">&#39;dataChanged&#39;</span><span class="p">,</span> <span class="p">(</span><span class="nx">newData</span><span class="p">)</span> <span class="p">=&gt;</span> <span class="p">{</span>
+  <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s1">&#39;newData:&#39;</span><span class="p">,</span> <span class="nx">newData</span><span class="p">)</span>
+ <span class="p">});</span>
+</pre></div>
+</div>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+</div>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="index.html">HiGlass</a></h1>
+
+
+
+
+
+
+
+
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="tutorial.html">Tutorial</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="tutorial.html#prerequisites">Prerequisites</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tutorial.html#quickly-viewing-a-dataset">Quickly viewing a dataset</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tutorial.html#running-higlass-locally">Running HiGlass locally</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tutorial.html#adding-data">Adding data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tutorial.html#viewing-data-in-the-client">Viewing data in the client</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tutorial.html#creating-a-superuser">Creating a superuser</a></li>
+</ul>
+</li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Javascript API</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#overview">Overview</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#api-functions">API Functions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#tiledpixitrack-functions">TiledPixiTrack Functions</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="python_api.html">Python API</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="python_api.html#higlass-server">higlass.server</a></li>
+<li class="toctree-l2"><a class="reference internal" href="python_api.html#higlass-client">higlass.client</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="jupyter.html">Jupyter Notebooks</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="jupyter.html#installation">Installation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="jupyter.html#usage">Usage</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="data_preparation.html">Data Preparation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="data_preparation.html#bed-files">Bed Files</a></li>
+<li class="toctree-l2"><a class="reference internal" href="data_preparation.html#bedpe-like-files">Bedpe-like Files</a></li>
+<li class="toctree-l2"><a class="reference internal" href="data_preparation.html#bedgraph-files">BedGraph files</a></li>
+<li class="toctree-l2"><a class="reference internal" href="data_preparation.html#bigwig-files">bigWig files</a></li>
+<li class="toctree-l2"><a class="reference internal" href="data_preparation.html#chromosome-sizes">Chromosome Sizes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="data_preparation.html#gene-annotation-tracks">Gene Annotation Tracks</a></li>
+<li class="toctree-l2"><a class="reference internal" href="data_preparation.html#hitile-files">Hitile files</a></li>
+<li class="toctree-l2"><a class="reference internal" href="data_preparation.html#cooler-files">Cooler files</a></li>
+<li class="toctree-l2"><a class="reference internal" href="data_preparation.html#multivec-files">Multivec Files</a></li>
+<li class="toctree-l2"><a class="reference internal" href="data_preparation.html#epilogos-data-multivec">Epilogos Data (multivec)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="data_preparation.html#other-data-multivec">Other Data (multivec)</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="track_types.html">Track Types</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="track_types.html#linking-value-scales">Linking value scales</a></li>
+<li class="toctree-l2"><a class="reference internal" href="track_types.html#bed-like">Bed-like</a></li>
+<li class="toctree-l2"><a class="reference internal" href="track_types.html#gene-annotations">Gene Annotations</a></li>
+<li class="toctree-l2"><a class="reference internal" href="track_types.html#heatmap">Heatmap</a></li>
+<li class="toctree-l2"><a class="reference internal" href="track_types.html#rotated-2d-heatmap">Rotated 2D Heatmap</a></li>
+<li class="toctree-l2"><a class="reference internal" href="track_types.html#d-rectangle-domain">2D Rectangle Domain</a></li>
+<li class="toctree-l2"><a class="reference internal" href="track_types.html#horizontal-2d-rectangle-domain">Horizontal 2D Rectangle Domain</a></li>
+<li class="toctree-l2"><a class="reference internal" href="track_types.html#line">Line</a></li>
+<li class="toctree-l2"><a class="reference internal" href="track_types.html#bar">Bar</a></li>
+<li class="toctree-l2"><a class="reference internal" href="track_types.html#point">Point</a></li>
+<li class="toctree-l2"><a class="reference internal" href="track_types.html#d-heatmap">1D Heatmap</a></li>
+<li class="toctree-l2"><a class="reference internal" href="track_types.html#chromosome-labels">Chromosome Labels</a></li>
+<li class="toctree-l2"><a class="reference internal" href="track_types.html#chromosome-grid">Chromosome Grid</a></li>
+<li class="toctree-l2"><a class="reference internal" href="track_types.html#stacked-bars">Stacked Bars</a></li>
+<li class="toctree-l2"><a class="reference internal" href="track_types.html#multiple-lines">Multiple Lines</a></li>
+<li class="toctree-l2"><a class="reference internal" href="track_types.html#multiple-bar-charts">Multiple Bar Charts</a></li>
+<li class="toctree-l2"><a class="reference internal" href="track_types.html#d-annotations">1D Annotations</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="views.html">Views</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="views.html#genome-position-search-box">Genome Position Search Box</a></li>
+<li class="toctree-l2"><a class="reference internal" href="views.html#view-synchronization">View synchronization</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="higlass_server.html">Server</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="higlass_server.html#configuration">Configuration</a></li>
+<li class="toctree-l2"><a class="reference internal" href="higlass_server.html#development">Development</a></li>
+<li class="toctree-l2"><a class="reference internal" href="higlass_server.html#testing">Testing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="higlass_server.html#api">API</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="higlass_docker.html">Docker</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="higlass_docker.html#running-locally">Running locally</a></li>
+<li class="toctree-l2"><a class="reference internal" href="higlass_docker.html#running-remotely">Running remotely</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="view_config.html">View Configs</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="view_config.html#show-a-specific-genomic-location">Show a specific genomic location</a></li>
+<li class="toctree-l2"><a class="reference internal" href="view_config.html#upload-a-viewconf-to-the-server">Upload a viewconf to the server</a></li>
+<li class="toctree-l2"><a class="reference internal" href="view_config.html#viewconf-structure">Viewconf Structure</a></li>
+<li class="toctree-l2"><a class="reference internal" href="view_config.html#views">Views</a></li>
+<li class="toctree-l2"><a class="reference internal" href="view_config.html#tracks">Tracks</a></li>
+<li class="toctree-l2"><a class="reference internal" href="view_config.html#overlay-tracks">Overlay Tracks</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="developer.html">Contributor Guidelines</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="tutorial.html" title="previous chapter">Tutorial</a></li>
+      <li>Next: <a href="python_api.html" title="next chapter">Python API</a></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2017,2018 HiGlass Authors.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.8.2</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="_sources/javascript_api.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

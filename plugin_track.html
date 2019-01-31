@@ -1,0 +1,477 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>Plugin Track Development &#8212; HiGlass v1.0 documentation</title>
+    <link rel="stylesheet" href="_static/higlass.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+  <!-- Global site tag (gtag.js) - Google Analytics -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=UA-77756807-1"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+
+    gtag('config', 'UA-77756807-1');
+  </script>
+  
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <div class="section" id="plugin-track-development">
+<h1>Plugin Track Development<a class="headerlink" href="#plugin-track-development" title="Permalink to this headline">¶</a></h1>
+<p>Plugin tracks are tracks which have an external code base but otherwise work
+just like normal track. We strongly recommend to develop new types of tracks
+as plugin tracks and only add very generic track so the HiGlass core library.</p>
+<div class="section" id="basic-skeleton">
+<h2>Basic skeleton<a class="headerlink" href="#basic-skeleton" title="Permalink to this headline">¶</a></h2>
+<p>A plugin track consist of two nested classes defining a wrapper, which loads
+HiGlass specific libraries and the actual track class that is similar to any
+other track. In the follow you can see a bare minimum example of this structure.</p>
+<div class="highlight-javascript notranslate"><div class="highlight"><pre><span></span><span class="kr">import</span> <span class="nx">register</span> <span class="nx">from</span> <span class="s1">&#39;higlass-register&#39;</span><span class="p">;</span>
+
+<span class="kr">const</span> <span class="nx">MyPluginTrack</span> <span class="o">=</span> <span class="kd">function</span> <span class="nx">MyPluginTrack</span><span class="p">(</span><span class="nx">HGC</span><span class="p">,</span> <span class="p">...</span><span class="nx">args</span><span class="p">)</span> <span class="p">{</span>
+  <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="k">new</span><span class="p">.</span><span class="nx">target</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">throw</span> <span class="k">new</span> <span class="nb">Error</span><span class="p">(</span>
+      <span class="s1">&#39;Uncaught TypeError: Class constructor cannot be invoked without &quot;new&quot;&#39;</span>
+    <span class="p">);</span>
+  <span class="p">}</span>
+
+  <span class="c1">// A tracks you want to extend with your plugin track. You should at the</span>
+  <span class="c1">// very least extend PixiTrack.</span>
+  <span class="kr">const</span> <span class="p">{</span> <span class="nx">BarTrack</span> <span class="p">}</span> <span class="o">=</span> <span class="nx">HGC</span><span class="p">.</span><span class="nx">tracks</span><span class="p">;</span>
+
+  <span class="c1">// Other libraries, utils, etc. that are provided by HiGlass (HGC)</span>
+  <span class="kr">const</span> <span class="p">{</span> <span class="p">...</span> <span class="p">}</span> <span class="o">=</span> <span class="nx">HGC</span><span class="p">.</span><span class="nx">libraries</span><span class="p">;</span>
+  <span class="kr">const</span> <span class="p">{</span> <span class="p">...</span> <span class="p">}</span> <span class="o">=</span> <span class="nx">HGC</span><span class="p">.</span><span class="nx">utils</span><span class="p">;</span>
+  <span class="kr">const</span> <span class="p">{</span> <span class="p">...</span> <span class="p">}</span> <span class="o">=</span> <span class="nx">HGC</span><span class="p">.</span><span class="nx">factories</span><span class="p">;</span>
+  <span class="kr">const</span> <span class="p">{</span> <span class="p">...</span> <span class="p">}</span> <span class="o">=</span> <span class="nx">HGC</span><span class="p">.</span><span class="nx">services</span><span class="p">;</span>
+  <span class="kr">const</span> <span class="p">{</span> <span class="p">...</span> <span class="p">}</span> <span class="o">=</span> <span class="nx">HGC</span><span class="p">.</span><span class="nx">utils</span><span class="p">;</span>
+  <span class="kr">const</span> <span class="p">{</span> <span class="p">...</span> <span class="p">}</span> <span class="o">=</span> <span class="nx">HGC</span><span class="p">.</span><span class="nx">configs</span><span class="p">;</span>
+
+  <span class="c1">// The version of HiGlass. Can be used to check for compatibility.</span>
+  <span class="kr">const</span> <span class="nx">hgVersion</span> <span class="o">=</span> <span class="nx">HGC</span><span class="p">.</span><span class="nx">VERSION</span><span class="p">;</span>
+
+  <span class="kr">class</span> <span class="nx">RangeTrackClass</span> <span class="kr">extends</span> <span class="nx">HGC</span><span class="p">.</span><span class="nx">tracks</span><span class="p">.</span><span class="nx">BarTrack</span> <span class="p">{</span>
+    <span class="nx">constructor</span><span class="p">(</span><span class="nx">context</span><span class="p">,</span> <span class="nx">options</span><span class="p">)</span> <span class="p">{</span>
+      <span class="kr">super</span><span class="p">(</span><span class="nx">context</span><span class="p">,</span> <span class="nx">options</span><span class="p">);</span>
+
+      <span class="p">...</span>
+    <span class="p">}</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+
+<span class="kr">const</span> <span class="nx">icon</span> <span class="o">=</span> <span class="s1">&#39;&lt;svg ...&gt;...&lt;/svg&gt;&#39;</span><span class="p">;</span>
+
+<span class="nx">MyPluginTrack</span><span class="p">.</span><span class="nx">config</span> <span class="o">=</span> <span class="p">{</span>
+  <span class="nx">type</span><span class="o">:</span> <span class="s1">&#39;my-track&#39;</span><span class="p">,</span>
+  <span class="nx">orientation</span><span class="o">:</span> <span class="s1">&#39;1d-horizontal&#39;</span><span class="p">,</span>
+  <span class="nx">thumbnail</span><span class="o">:</span> <span class="k">new</span> <span class="nx">DOMParser</span><span class="p">().</span><span class="nx">parseFromString</span><span class="p">(</span><span class="nx">icon</span><span class="p">,</span> <span class="s1">&#39;text/xml&#39;</span><span class="p">).</span><span class="nx">documentElement</span><span class="p">,</span>
+  <span class="nx">availableOptions</span><span class="o">:</span> <span class="p">[</span> <span class="p">...</span> <span class="p">]</span>
+  <span class="nx">defaultOptions</span><span class="o">:</span> <span class="p">{</span> <span class="p">...</span> <span class="p">}</span>
+<span class="p">};</span>
+
+<span class="c1">// It&#39;s important that you register your plugin track with HiGlass otherwise</span>
+<span class="c1">// HiGlass will not know about it</span>
+<span class="nx">register</span><span class="p">({</span>
+  <span class="nx">name</span><span class="o">:</span> <span class="s1">&#39;MyPluginTrack&#39;</span><span class="p">,</span>
+  <span class="nx">track</span><span class="o">:</span> <span class="nx">MyPluginTrack</span><span class="p">,</span>
+  <span class="nx">config</span><span class="o">:</span> <span class="nx">MyPluginTrack</span><span class="p">.</span><span class="nx">config</span>
+<span class="p">});</span>
+
+<span class="kr">export</span> <span class="k">default</span> <span class="nx">MyPluginTrack</span><span class="p">;</span>
+</pre></div>
+</div>
+<p>The best way to get start implementing a plugin tracks is to take a look at
+existing plugin tracks and their code. You can find a list of all officially
+supported plugin tracks can be found at
+<a class="reference external" href="http://higlass.io/plugins">higlass.io/plugins</a></p>
+<p>In order to make the track display anything interesting you need to extend
+the existing rendering methods. To find out how HiGlass renders data please
+take a look at some core tracks like <code class="docutils literal notranslate"><span class="pre">BarTrack.js</span></code>.</p>
+</div>
+<div class="section" id="available-tracks-libraries-and-utils">
+<h2>Available tracks, libraries, and utils<a class="headerlink" href="#available-tracks-libraries-and-utils" title="Permalink to this headline">¶</a></h2>
+<p>Plugin tracks have access to many core tracks, libraries, and internal
+utilities. Below is an overview of all available imports.</p>
+<div class="section" id="tracks">
+<h3>Tracks<a class="headerlink" href="#tracks" title="Permalink to this headline">¶</a></h3>
+<p><strong>Prefix:</strong> <code class="docutils literal notranslate"><span class="pre">tracks</span></code> (e.g., <code class="docutils literal notranslate"><span class="pre">HGC.tracks.BarTrack</span></code>)</p>
+<ul class="simple">
+<li>Annotations2dTrack</li>
+<li>ArrowheadDomainsTrack</li>
+<li>BarTrack</li>
+<li>BedLikeTrack</li>
+<li>CNVIntervalTrack</li>
+<li>CombinedTrack</li>
+<li>DivergentBarTrack</li>
+<li>HeatmapTiledPixiTrack</li>
+<li>Horizontal2DDomainsTrack</li>
+<li>HorizontalChromosomeLabels</li>
+<li>HorizontalGeneAnnotationsTrack</li>
+<li>HorizontalHeatmapTrack</li>
+<li>HorizontalLine1DPixiTrack</li>
+<li>HorizontalMultivecTrack</li>
+<li>HorizontalPoint1DPixiTrack</li>
+<li>HorizontalTiledPlot</li>
+<li>HorizontalTrack</li>
+<li>Id2DTiledPixiTrack</li>
+<li>IdHorizontal1DTiledPixiTrack</li>
+<li>IdVertical1DTiledPixiTrack</li>
+<li>LeftAxisTrack</li>
+<li>MapboxTilesTrack</li>
+<li>MoveableTrack</li>
+<li>OSMTilesTrack</li>
+<li>PixiTrack</li>
+<li>SVGTrack</li>
+<li>SquareMarkersTrack</li>
+<li>Tiled1DPixiTrack</li>
+<li>TiledPixiTrack</li>
+<li>TopAxisTrack</li>
+<li>Track</li>
+<li>ValueIntervalTrack</li>
+<li>VerticalTiled1DPixiTrack</li>
+<li>VerticalTrack</li>
+</ul>
+</div>
+<div class="section" id="libraries">
+<h3>Libraries<a class="headerlink" href="#libraries" title="Permalink to this headline">¶</a></h3>
+<p><strong>Prefix:</strong> <code class="docutils literal notranslate"><span class="pre">libraries</span></code> (e.g., <code class="docutils literal notranslate"><span class="pre">HGC.libraries.PIXI</span></code>)</p>
+<ul class="simple">
+<li>d3Array</li>
+<li>d3Axis</li>
+<li>d3Brush</li>
+<li>d3Color</li>
+<li>d3Drag</li>
+<li>d3Dsv</li>
+<li>d3Format</li>
+<li>d3Geo</li>
+<li>d3Queue</li>
+<li>d3Request</li>
+<li>d3Scale</li>
+<li>d3Selection</li>
+<li>d3Transition</li>
+<li>d3Zoom</li>
+<li>PIXI</li>
+<li>mix</li>
+</ul>
+</div>
+<div class="section" id="factories">
+<h3>Factories<a class="headerlink" href="#factories" title="Permalink to this headline">¶</a></h3>
+<p><strong>Prefix:</strong> <code class="docutils literal notranslate"><span class="pre">factories</span></code> (e.g., <code class="docutils literal notranslate"><span class="pre">HGC.factories.LruCache</span></code>)</p>
+<ul class="simple">
+<li>ContextMenuItem</li>
+<li>DataFetcher</li>
+<li>LruCache</li>
+</ul>
+</div>
+<div class="section" id="services">
+<h3>Services<a class="headerlink" href="#services" title="Permalink to this headline">¶</a></h3>
+<p><strong>Prefix:</strong> <code class="docutils literal notranslate"><span class="pre">services</span></code> (e.g., <code class="docutils literal notranslate"><span class="pre">HGC.services.chromInfo</span></code>)</p>
+<p>chromInfo
+createDomEvent
+ElementResizeListener
+tileProxy
+requestsInFlight
+setTileProxyAuthHeader
+getTileProxyAuthHeader
+authHeader
+getDarkTheme
+setDarkTheme</p>
+</div>
+<div class="section" id="utils">
+<h3>Utils<a class="headerlink" href="#utils" title="Permalink to this headline">¶</a></h3>
+<p><strong>Prefix:</strong> <code class="docutils literal notranslate"><span class="pre">utils</span></code> (e.g., <code class="docutils literal notranslate"><span class="pre">HGC.utils.absToChr</span></code>)</p>
+<ul class="simple">
+<li>absToChr</li>
+<li>accessorTransposition</li>
+<li>addArrays</li>
+<li>addClass</li>
+<li>base64ToCanvas</li>
+<li>chromInfoBisector</li>
+<li>chrToAbs</li>
+<li>cloneEvent</li>
+<li>colorDomainToRgbaArray</li>
+<li>colorToHex</li>
+<li>dataToGenomicLoci</li>
+<li>debounce</li>
+<li>dictFromTuples</li>
+<li>dictItems</li>
+<li>dictKeys</li>
+<li>dictValues</li>
+<li>download</li>
+<li>fillInMinWidths</li>
+<li>flatten</li>
+<li>forEach</li>
+<li>forwardEvent</li>
+<li>genomeLociToPixels</li>
+<li>getElementDim</li>
+<li>getTrackByUid</li>
+<li>getTrackObjById</li>
+<li>getTrackPositionByUid</li>
+<li>getXylofon</li>
+<li>gradient</li>
+<li>hasClass</li>
+<li>hasParent</li>
+<li>hexStrToInt</li>
+<li>intoTheVoid</li>
+<li>isTrackOrChildTrack</li>
+<li>isWithin</li>
+<li>latToY</li>
+<li>loadChromInfos</li>
+<li>lngToX</li>
+<li>map</li>
+<li>max</li>
+<li>min</li>
+<li>mod</li>
+<li>ndarrayAssign</li>
+<li>ndarrayFlatten</li>
+<li>ndarrayToList</li>
+<li>numericifyVersion</li>
+<li>objVals</li>
+<li>or</li>
+<li>pixiTextToSvg</li>
+<li>positionedTracksToAllTracks</li>
+<li>q</li>
+<li>reduce</li>
+<li>rangeQuery2d</li>
+<li>relToAbsChromPos</li>
+<li>removeClass</li>
+<li>resetD3BrushStyle</li>
+<li>rgbToHex</li>
+<li>scalesCenterAndK</li>
+<li>scalesToGenomeLoci</li>
+<li>showMousePosition</li>
+<li>some</li>
+<li>sum</li>
+<li>svgLine</li>
+<li>tileToCanvas</li>
+<li>totalTrackPixelHeight</li>
+<li>toVoid</li>
+<li>trimTrailingSlash</li>
+<li>valueToColor</li>
+<li>expandCombinedTracks</li>
+<li>segmentsToRows</li>
+<li>getTrackObjectFromHGC</li>
+<li>getTrackRenderer</li>
+<li>getTiledPlot</li>
+</ul>
+</div>
+<div class="section" id="configs">
+<h3>Configs<a class="headerlink" href="#configs" title="Permalink to this headline">¶</a></h3>
+<p><strong>Prefix:</strong> <code class="docutils literal notranslate"><span class="pre">configs</span></code> (e.g., <code class="docutils literal notranslate"><span class="pre">HGC.configs.MAX_CLICK_DELAY</span></code>)</p>
+<ul class="simple">
+<li>MAX_CLICK_DELAY</li>
+<li>MOUSE_TOOL_MOVE</li>
+<li>MOUSE_TOOL_SELECT</li>
+<li>TILE_FETCH_DEBOUNCE</li>
+<li>ZOOM_DEBOUNCE</li>
+<li>SHORT_DRAG_TIMEOUT</li>
+<li>LONG_DRAG_TIMEOUT</li>
+<li>LOCATION_LISTENER_PREFIX</li>
+<li>ZOOM_TRANSITION_DURATION</li>
+<li>DEFAULT_SERVER</li>
+<li>VIEW_HEADER_MED_WIDTH_SEARCH_BAR</li>
+<li>VIEW_HEADER_MIN_WIDTH_SEARCH_BAR</li>
+<li>TRACK_LOCATIONS</li>
+<li>MIN_HORIZONTAL_HEIGHT</li>
+<li>MIN_VERTICAL_WIDTH</li>
+<li>AVAILABLE_TRACK_TYPES</li>
+<li>DATATYPE_TO_TRACK_TYPE</li>
+<li>HEATED_OBJECT_MAP</li>
+<li>IS_TRACK_RANGE_SELECTABLE</li>
+<li>OPTIONS_INFO</li>
+<li>TRACKS_INFO</li>
+<li>TRACKS_INFO_BY_TYPE</li>
+<li>POSITIONS_BY_DATATYPE</li>
+<li>DEFAULT_TRACKS_FOR_DATATYPE</li>
+</ul>
+</div>
+<div class="section" id="other">
+<h3>Other<a class="headerlink" href="#other" title="Permalink to this headline">¶</a></h3>
+<p>The following imports have no prefix. E.g., to import the HiGlass version simple
+do <code class="docutils literal notranslate"><span class="pre">HGC.VERSION</span></code></p>
+<ul class="simple">
+<li><code class="docutils literal notranslate"><span class="pre">VERSION</span></code>: The HiGlass version. Useful for checking the compatibility</li>
+</ul>
+</div>
+</div>
+</div>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="index.html">HiGlass</a></h1>
+
+
+
+
+
+
+
+
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="tutorial.html">Tutorial</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="tutorial.html#prerequisites">Prerequisites</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tutorial.html#quickly-viewing-a-dataset">Quickly viewing a dataset</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tutorial.html#running-higlass-locally">Running HiGlass locally</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tutorial.html#adding-data">Adding data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tutorial.html#viewing-data-in-the-client">Viewing data in the client</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tutorial.html#creating-a-superuser">Creating a superuser</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="javascript_api.html">Javascript API</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="javascript_api.html#overview">Overview</a></li>
+<li class="toctree-l2"><a class="reference internal" href="javascript_api.html#api-functions">API Functions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="javascript_api.html#tiledpixitrack-functions">TiledPixiTrack Functions</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="python_api.html">Python API</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="python_api.html#higlass-server">higlass.server</a></li>
+<li class="toctree-l2"><a class="reference internal" href="python_api.html#higlass-client">higlass.client</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="jupyter.html">Jupyter Notebooks</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="jupyter.html#installation">Installation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="jupyter.html#usage">Usage</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="data_preparation.html">Data Preparation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="data_preparation.html#bed-files">Bed Files</a></li>
+<li class="toctree-l2"><a class="reference internal" href="data_preparation.html#bedpe-like-files">Bedpe-like Files</a></li>
+<li class="toctree-l2"><a class="reference internal" href="data_preparation.html#bedgraph-files">BedGraph files</a></li>
+<li class="toctree-l2"><a class="reference internal" href="data_preparation.html#bigwig-files">bigWig files</a></li>
+<li class="toctree-l2"><a class="reference internal" href="data_preparation.html#chromosome-sizes">Chromosome Sizes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="data_preparation.html#gene-annotation-tracks">Gene Annotation Tracks</a></li>
+<li class="toctree-l2"><a class="reference internal" href="data_preparation.html#hitile-files">Hitile files</a></li>
+<li class="toctree-l2"><a class="reference internal" href="data_preparation.html#cooler-files">Cooler files</a></li>
+<li class="toctree-l2"><a class="reference internal" href="data_preparation.html#multivec-files">Multivec Files</a></li>
+<li class="toctree-l2"><a class="reference internal" href="data_preparation.html#epilogos-data-multivec">Epilogos Data (multivec)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="data_preparation.html#other-data-multivec">Other Data (multivec)</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="track_types.html">Track Types</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="track_types.html#linking-value-scales">Linking value scales</a></li>
+<li class="toctree-l2"><a class="reference internal" href="track_types.html#bed-like">Bed-like</a></li>
+<li class="toctree-l2"><a class="reference internal" href="track_types.html#gene-annotations">Gene Annotations</a></li>
+<li class="toctree-l2"><a class="reference internal" href="track_types.html#heatmap">Heatmap</a></li>
+<li class="toctree-l2"><a class="reference internal" href="track_types.html#rotated-2d-heatmap">Rotated 2D Heatmap</a></li>
+<li class="toctree-l2"><a class="reference internal" href="track_types.html#d-rectangle-domain">2D Rectangle Domain</a></li>
+<li class="toctree-l2"><a class="reference internal" href="track_types.html#horizontal-2d-rectangle-domain">Horizontal 2D Rectangle Domain</a></li>
+<li class="toctree-l2"><a class="reference internal" href="track_types.html#line">Line</a></li>
+<li class="toctree-l2"><a class="reference internal" href="track_types.html#bar">Bar</a></li>
+<li class="toctree-l2"><a class="reference internal" href="track_types.html#point">Point</a></li>
+<li class="toctree-l2"><a class="reference internal" href="track_types.html#d-heatmap">1D Heatmap</a></li>
+<li class="toctree-l2"><a class="reference internal" href="track_types.html#chromosome-labels">Chromosome Labels</a></li>
+<li class="toctree-l2"><a class="reference internal" href="track_types.html#chromosome-grid">Chromosome Grid</a></li>
+<li class="toctree-l2"><a class="reference internal" href="track_types.html#stacked-bars">Stacked Bars</a></li>
+<li class="toctree-l2"><a class="reference internal" href="track_types.html#multiple-lines">Multiple Lines</a></li>
+<li class="toctree-l2"><a class="reference internal" href="track_types.html#multiple-bar-charts">Multiple Bar Charts</a></li>
+<li class="toctree-l2"><a class="reference internal" href="track_types.html#d-annotations">1D Annotations</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="views.html">Views</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="views.html#genome-position-search-box">Genome Position Search Box</a></li>
+<li class="toctree-l2"><a class="reference internal" href="views.html#view-synchronization">View synchronization</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="higlass_server.html">Server</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="higlass_server.html#configuration">Configuration</a></li>
+<li class="toctree-l2"><a class="reference internal" href="higlass_server.html#development">Development</a></li>
+<li class="toctree-l2"><a class="reference internal" href="higlass_server.html#testing">Testing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="higlass_server.html#api">API</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="higlass_docker.html">Docker</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="higlass_docker.html#running-locally">Running locally</a></li>
+<li class="toctree-l2"><a class="reference internal" href="higlass_docker.html#running-remotely">Running remotely</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="view_config.html">View Configs</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="view_config.html#show-a-specific-genomic-location">Show a specific genomic location</a></li>
+<li class="toctree-l2"><a class="reference internal" href="view_config.html#upload-a-viewconf-to-the-server">Upload a viewconf to the server</a></li>
+<li class="toctree-l2"><a class="reference internal" href="view_config.html#viewconf-structure">Viewconf Structure</a></li>
+<li class="toctree-l2"><a class="reference internal" href="view_config.html#views">Views</a></li>
+<li class="toctree-l2"><a class="reference internal" href="view_config.html#tracks">Tracks</a></li>
+<li class="toctree-l2"><a class="reference internal" href="view_config.html#overlay-tracks">Overlay Tracks</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="developer.html">Contributor Guidelines</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2017,2018 HiGlass Authors.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.8.2</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="_sources/plugin_track.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

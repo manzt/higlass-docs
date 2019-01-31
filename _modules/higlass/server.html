@@ -1,0 +1,646 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>higlass.server &#8212; HiGlass v1.0 documentation</title>
+    <link rel="stylesheet" href="../../_static/higlass.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+  <!-- Global site tag (gtag.js) - Google Analytics -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=UA-77756807-1"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+
+    gtag('config', 'UA-77756807-1');
+  </script>
+  
+   
+  <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <h1>Source code for higlass.server</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">functools</span> <span class="k">import</span> <span class="n">partial</span>
+<span class="kn">import</span> <span class="nn">multiprocess</span> <span class="k">as</span> <span class="nn">mp</span>
+<span class="kn">import</span> <span class="nn">cytoolz</span> <span class="k">as</span> <span class="nn">toolz</span>
+<span class="kn">import</span> <span class="nn">os.path</span> <span class="k">as</span> <span class="nn">op</span>
+<span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">import</span> <span class="nn">socket</span>
+<span class="kn">import</span> <span class="nn">json</span>
+<span class="kn">import</span> <span class="nn">time</span>
+<span class="kn">import</span> <span class="nn">sys</span>
+<span class="kn">import</span> <span class="nn">os</span>
+
+<span class="kn">from</span> <span class="nn">flask</span> <span class="k">import</span> <span class="n">Flask</span>
+<span class="kn">from</span> <span class="nn">flask</span> <span class="k">import</span> <span class="n">request</span><span class="p">,</span> <span class="n">jsonify</span>
+<span class="c1">#from flask_restful import reqparse, abort, Api, Resource</span>
+<span class="kn">from</span> <span class="nn">flask_cors</span> <span class="k">import</span> <span class="n">CORS</span>
+
+<span class="kn">from</span> <span class="nn">fuse</span> <span class="k">import</span> <span class="n">FUSE</span>
+<span class="kn">import</span> <span class="nn">hashlib</span> <span class="k">as</span> <span class="nn">hl</span>
+<span class="kn">import</span> <span class="nn">requests</span>
+<span class="kn">import</span> <span class="nn">slugid</span>
+<span class="kn">import</span> <span class="nn">sh</span>
+
+<span class="kn">import</span> <span class="nn">higlass.tilesets</span> <span class="k">as</span> <span class="nn">hgti</span>
+
+
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;Server&#39;</span><span class="p">]</span>
+
+<span class="k">def</span> <span class="nf">get_filepath</span><span class="p">(</span><span class="n">filepath</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Get the filepath from a tileset definition</span>
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    tileset_def: { &#39;filepath&#39;: ..., &#39;uid&#39;: ..., &#39;filetype&#39;: ...}</span>
+<span class="sd">        The tileset definition     </span>
+<span class="sd">    returns: string</span>
+<span class="sd">        The filepath, either as specified in the tileset_def or</span>
+<span class="sd">        None</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+        
+    <span class="k">if</span> <span class="n">filepath</span><span class="p">[:</span><span class="mi">7</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;http://&#39;</span><span class="p">:</span>
+        <span class="n">filepath</span> <span class="o">=</span> <span class="n">fuse</span><span class="o">.</span><span class="n">http_directory</span> <span class="o">+</span> <span class="n">filepath</span><span class="p">[</span><span class="mi">6</span><span class="p">:]</span> <span class="o">+</span> <span class="s2">&quot;..&quot;</span>
+    <span class="k">if</span> <span class="n">filepath</span><span class="p">[:</span><span class="mi">8</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;https://&#39;</span><span class="p">:</span>
+        <span class="n">filepath</span> <span class="o">=</span> <span class="n">fuse</span><span class="o">.</span><span class="n">https_directory</span> <span class="o">+</span> <span class="n">filepath</span><span class="p">[</span><span class="mi">7</span><span class="p">:]</span> <span class="o">+</span> <span class="s2">&quot;..&quot;</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;******** filepath:&quot;</span><span class="p">,</span> <span class="n">filepath</span><span class="p">)</span>
+    
+    <span class="k">return</span> <span class="n">filepath</span>
+
+
+<span class="k">def</span> <span class="nf">create_app</span><span class="p">(</span><span class="n">tilesets</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">log_file</span><span class="p">,</span> <span class="n">log_level</span><span class="p">,</span> <span class="n">file_ids</span><span class="p">):</span>
+    <span class="n">app</span> <span class="o">=</span> <span class="n">Flask</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
+    <span class="n">CORS</span><span class="p">(</span><span class="n">app</span><span class="p">)</span>
+
+    <span class="n">TILESETS</span> <span class="o">=</span> <span class="n">tilesets</span>
+
+    <span class="n">remote_tilesets</span> <span class="o">=</span> <span class="p">{</span>
+
+    <span class="p">}</span>
+
+    <span class="nd">@app</span><span class="o">.</span><span class="n">route</span><span class="p">(</span><span class="s1">&#39;/api/v1/&#39;</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">hello</span><span class="p">():</span>
+        <span class="k">return</span><span class="p">(</span><span class="s2">&quot;Hello World!&quot;</span><span class="p">)</span>
+
+    <span class="nd">@app</span><span class="o">.</span><span class="n">route</span><span class="p">(</span><span class="s1">&#39;/api/v1/register_url/&#39;</span><span class="p">,</span> <span class="n">methods</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;POST&#39;</span><span class="p">])</span>
+    <span class="k">def</span> <span class="nf">register_url</span><span class="p">():</span>
+        <span class="n">js</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">json</span>
+        <span class="n">key</span> <span class="o">=</span> <span class="p">(</span><span class="n">js</span><span class="p">[</span><span class="s1">&#39;fileUrl&#39;</span><span class="p">],</span> <span class="n">js</span><span class="p">[</span><span class="s1">&#39;filetype&#39;</span><span class="p">])</span>
+
+        <span class="k">if</span> <span class="n">js</span><span class="p">[</span><span class="s1">&#39;filetype&#39;</span><span class="p">]</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">hgti</span><span class="o">.</span><span class="n">by_filetype</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">jsonify</span><span class="p">({</span>
+                <span class="s1">&#39;error&#39;</span><span class="p">:</span> <span class="s2">&quot;Unknown filetype: </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">js</span><span class="p">[</span><span class="s1">&#39;filetype&#39;</span><span class="p">])</span>
+            <span class="p">}),</span><span class="mi">400</span>
+
+        <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">remote_tilesets</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">jsonify</span><span class="p">({</span>
+                <span class="s1">&#39;uid&#39;</span><span class="p">:</span> <span class="n">remote_tilesets</span><span class="p">[</span><span class="n">key</span><span class="p">]</span><span class="o">.</span><span class="n">uuid</span>
+            <span class="p">})</span>
+
+        <span class="n">new_tileset</span> <span class="o">=</span> <span class="n">hgti</span><span class="o">.</span><span class="n">by_filetype</span><span class="p">[</span><span class="n">js</span><span class="p">[</span><span class="s1">&#39;filetype&#39;</span><span class="p">]](</span><span class="n">get_filepath</span><span class="p">(</span><span class="n">js</span><span class="p">[</span><span class="s1">&#39;fileUrl&#39;</span><span class="p">]))</span>
+        <span class="n">remote_tilesets</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">new_tileset</span>
+        
+        <span class="k">return</span> <span class="n">jsonify</span><span class="p">({</span>
+            <span class="s1">&#39;uid&#39;</span><span class="p">:</span> <span class="n">new_tileset</span><span class="o">.</span><span class="n">uuid</span>
+        <span class="p">})</span>
+
+    <span class="nd">@app</span><span class="o">.</span><span class="n">route</span><span class="p">(</span><span class="s1">&#39;/api/v1/chrom-sizes/&#39;</span><span class="p">,</span> <span class="n">methods</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;GET&#39;</span><span class="p">])</span>
+    <span class="k">def</span> <span class="nf">chrom_sizes</span><span class="p">():</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Coordinate system resource.</span>
+
+<span class="sd">        Query Parameters</span>
+<span class="sd">        ----------------</span>
+<span class="sd">        id : string</span>
+<span class="sd">            Tileset UUID</span>
+<span class="sd">        type : { tsv | json }</span>
+<span class="sd">            Response format. Default is tsv.</span>
+<span class="sd">        cum : boolean</span>
+<span class="sd">            Return cumulative lengths. Default is false.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">uuid</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">args</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;id&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="n">res_type</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">args</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;type&#39;</span><span class="p">,</span> <span class="s1">&#39;tsv&#39;</span><span class="p">)</span>
+        <span class="n">incl_cum</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">args</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;cum&#39;</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
+
+        <span class="n">ts</span> <span class="o">=</span> <span class="nb">next</span><span class="p">((</span><span class="n">ts</span> <span class="k">for</span> <span class="n">ts</span> <span class="ow">in</span> <span class="n">list_tilesets</span><span class="p">()</span> <span class="k">if</span> <span class="n">ts</span><span class="o">.</span><span class="n">uuid</span> <span class="o">==</span> <span class="n">uuid</span><span class="p">),</span> <span class="kc">None</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">ts</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">jsonify</span><span class="p">({</span><span class="s2">&quot;error&quot;</span><span class="p">:</span> <span class="s2">&quot;Not found&quot;</span><span class="p">}),</span> <span class="mi">404</span>
+
+        <span class="n">data</span> <span class="o">=</span> <span class="n">ts</span><span class="o">.</span><span class="n">chromsizes</span><span class="p">()</span>
+
+        <span class="n">new_data</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="k">if</span> <span class="n">incl_cum</span><span class="p">:</span>
+            <span class="n">cum</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="k">for</span> <span class="p">(</span><span class="n">chrom</span><span class="p">,</span> <span class="n">size</span><span class="p">)</span> <span class="ow">in</span> <span class="n">data</span><span class="p">:</span>
+                <span class="n">new_data</span> <span class="o">+=</span> <span class="p">[(</span><span class="n">chrom</span><span class="p">,</span> <span class="n">size</span><span class="p">,</span> <span class="n">cum</span><span class="p">)]</span>
+                <span class="n">cum</span> <span class="o">+=</span> <span class="n">size</span>
+
+            <span class="k">for</span> <span class="n">chrom</span> <span class="ow">in</span> <span class="n">data</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>   <span class="c1"># dictionaries in py3.6+ are ordered!</span>
+                <span class="n">data</span><span class="p">[</span><span class="n">chrom</span><span class="p">][</span><span class="s1">&#39;offset&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">cum</span>
+                <span class="n">cum</span> <span class="o">+=</span> <span class="n">data</span><span class="p">[</span><span class="n">chrom</span><span class="p">][</span><span class="s1">&#39;size&#39;</span><span class="p">]</span>
+
+        <span class="k">if</span> <span class="n">res_type</span> <span class="o">==</span> <span class="s1">&#39;json&#39;</span><span class="p">:</span>
+            <span class="c1"># should return</span>
+            <span class="c1"># { uuid: {</span>
+            <span class="c1">#   &#39;chr1&#39;: {&#39;size&#39;: 2343, &#39;offset&#39;: 0},</span>
+            <span class="c1">#</span>
+            <span class="k">if</span> <span class="n">incl_cum</span><span class="p">:</span>
+                <span class="n">j</span> <span class="o">=</span> <span class="p">{</span>
+                        <span class="n">ts</span><span class="o">.</span><span class="n">uuid</span><span class="p">:</span> <span class="nb">dict</span><span class="p">([(</span><span class="n">chrom</span><span class="p">,</span> <span class="p">{</span> <span class="s1">&#39;size&#39;</span><span class="p">:</span> <span class="n">size</span><span class="p">,</span> <span class="s1">&#39;offset&#39;</span><span class="p">:</span> <span class="n">offset</span> <span class="p">})</span> <span class="k">for</span>
+                            <span class="p">(</span><span class="n">chrom</span><span class="p">,</span> <span class="n">size</span><span class="p">,</span> <span class="n">offset</span><span class="p">)</span> <span class="ow">in</span> <span class="n">data</span><span class="p">])</span>
+                    <span class="p">}</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">j</span> <span class="o">=</span> <span class="p">{</span>
+                        <span class="n">ts</span><span class="o">.</span><span class="n">uuid</span><span class="p">:</span> <span class="nb">dict</span><span class="p">([(</span><span class="n">chrom</span><span class="p">,</span> <span class="p">{</span> <span class="s1">&#39;size&#39;</span><span class="p">:</span> <span class="n">size</span> <span class="p">})</span> <span class="k">for</span>
+                            <span class="p">(</span><span class="n">chrom</span><span class="p">,</span> <span class="n">size</span><span class="p">)</span> <span class="ow">in</span> <span class="n">data</span><span class="p">])</span>
+                    <span class="p">}</span>
+            <span class="k">return</span> <span class="n">jsonify</span><span class="p">(</span><span class="n">j</span><span class="p">)</span>
+
+        <span class="k">elif</span> <span class="n">res_type</span> <span class="o">==</span> <span class="s1">&#39;tsv&#39;</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">incl_cum</span><span class="p">:</span>
+               <span class="k">return</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">{}</span><span class="se">\t</span><span class="si">{}</span><span class="se">\t</span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">chrom</span><span class="p">,</span> <span class="n">size</span><span class="p">,</span> <span class="n">cum</span><span class="p">)</span>
+                       <span class="k">for</span> <span class="n">chrom</span><span class="p">,</span> <span class="n">size</span><span class="p">,</span> <span class="n">cum</span> <span class="ow">in</span> <span class="n">data</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">return</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">{}</span><span class="se">\t</span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">chrom</span><span class="p">,</span> <span class="n">size</span><span class="p">)</span>
+                    <span class="k">for</span> <span class="n">chrom</span><span class="p">,</span> <span class="n">size</span> <span class="ow">in</span> <span class="n">data</span><span class="p">)</span>
+
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">jsonify</span><span class="p">({</span><span class="s2">&quot;error&quot;</span><span class="p">:</span> <span class="s2">&quot;Unknown response type&quot;</span><span class="p">}),</span> <span class="mi">500</span>
+
+    <span class="nd">@app</span><span class="o">.</span><span class="n">route</span><span class="p">(</span><span class="s1">&#39;/api/v1/uids_by_filename/&#39;</span><span class="p">,</span> <span class="n">methods</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;GET&#39;</span><span class="p">])</span>
+    <span class="k">def</span> <span class="nf">uids_by_filename</span><span class="p">():</span>
+        <span class="k">return</span> <span class="n">jsonify</span><span class="p">({</span>
+            <span class="s2">&quot;count&quot;</span><span class="p">:</span> <span class="nb">len</span><span class="p">(</span><span class="n">TILESETS</span><span class="p">),</span>
+            <span class="s2">&quot;results&quot;</span><span class="p">:</span> <span class="p">{</span><span class="n">i</span><span class="p">:</span> <span class="n">TILESETS</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">TILESETS</span><span class="p">))}</span>
+        <span class="p">})</span>
+
+    <span class="nd">@app</span><span class="o">.</span><span class="n">route</span><span class="p">(</span><span class="s1">&#39;/api/v1/tilesets/&#39;</span><span class="p">,</span> <span class="n">methods</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;GET&#39;</span><span class="p">])</span>
+    <span class="k">def</span> <span class="nf">tilesets</span><span class="p">():</span>
+        <span class="k">return</span> <span class="n">jsonify</span><span class="p">({</span>
+            <span class="s2">&quot;count&quot;</span><span class="p">:</span> <span class="nb">len</span><span class="p">(</span><span class="n">TILESETS</span><span class="p">),</span>
+            <span class="s2">&quot;next&quot;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="s2">&quot;previous&quot;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="s2">&quot;results&quot;</span><span class="p">:</span> <span class="p">[</span><span class="n">ts</span><span class="o">.</span><span class="n">meta</span> <span class="k">for</span> <span class="n">ts</span> <span class="ow">in</span> <span class="n">TILESETS</span><span class="p">],</span>
+        <span class="p">})</span>
+
+    <span class="k">def</span> <span class="nf">list_tilesets</span><span class="p">():</span>
+        <span class="k">return</span> <span class="p">(</span>
+            <span class="n">TILESETS</span> <span class="o">+</span> <span class="nb">list</span><span class="p">(</span><span class="n">remote_tilesets</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
+            <span class="p">)</span>
+
+    <span class="nd">@app</span><span class="o">.</span><span class="n">route</span><span class="p">(</span><span class="s1">&#39;/api/v1/tileset_info/&#39;</span><span class="p">,</span> <span class="n">methods</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;GET&#39;</span><span class="p">])</span>
+    <span class="k">def</span> <span class="nf">tileset_info</span><span class="p">():</span>
+        <span class="n">uuids</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">args</span><span class="o">.</span><span class="n">getlist</span><span class="p">(</span><span class="s2">&quot;d&quot;</span><span class="p">)</span>
+
+        <span class="n">info</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">uuid</span> <span class="ow">in</span> <span class="n">uuids</span><span class="p">:</span>
+            <span class="n">ts</span> <span class="o">=</span> <span class="nb">next</span><span class="p">((</span><span class="n">ts</span> <span class="k">for</span> <span class="n">ts</span> <span class="ow">in</span> <span class="n">list_tilesets</span><span class="p">()</span> <span class="k">if</span> <span class="n">ts</span><span class="o">.</span><span class="n">uuid</span> <span class="o">==</span> <span class="n">uuid</span><span class="p">),</span> <span class="kc">None</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">ts</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">info</span><span class="p">[</span><span class="n">uuid</span><span class="p">]</span> <span class="o">=</span> <span class="n">ts</span><span class="o">.</span><span class="n">tileset_info</span><span class="p">()</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">info</span><span class="p">[</span><span class="n">uuid</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+                    <span class="s1">&#39;error&#39;</span><span class="p">:</span> <span class="s1">&#39;No such tileset with uid: </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">uuid</span><span class="p">)</span>
+                <span class="p">}</span>
+
+        <span class="k">return</span> <span class="n">jsonify</span><span class="p">(</span><span class="n">info</span><span class="p">)</span>
+
+    <span class="nd">@app</span><span class="o">.</span><span class="n">route</span><span class="p">(</span><span class="s1">&#39;/api/v1/tiles/&#39;</span><span class="p">,</span> <span class="n">methods</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;GET&#39;</span><span class="p">])</span>
+    <span class="k">def</span> <span class="nf">tiles</span><span class="p">():</span>
+        <span class="n">tids_requested</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">request</span><span class="o">.</span><span class="n">args</span><span class="o">.</span><span class="n">getlist</span><span class="p">(</span><span class="s2">&quot;d&quot;</span><span class="p">))</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">tids_requested</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">jsonify</span><span class="p">({</span><span class="s1">&#39;error&#39;</span><span class="p">:</span> <span class="s1">&#39;No tiles requested&#39;</span><span class="p">}),</span> <span class="mi">400</span>
+
+        <span class="n">extract_uuid</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">tid</span><span class="p">:</span> <span class="n">tid</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">uuids_to_tids</span> <span class="o">=</span> <span class="n">toolz</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="n">extract_uuid</span><span class="p">,</span> <span class="n">tids_requested</span><span class="p">)</span>
+
+        <span class="n">tiles</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">uuid</span><span class="p">,</span> <span class="n">tids</span> <span class="ow">in</span> <span class="n">uuids_to_tids</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="n">ts</span> <span class="o">=</span> <span class="nb">next</span><span class="p">((</span><span class="n">ts</span> <span class="k">for</span> <span class="n">ts</span> <span class="ow">in</span> <span class="n">list_tilesets</span><span class="p">()</span> <span class="k">if</span> <span class="n">ts</span><span class="o">.</span><span class="n">uuid</span> <span class="o">==</span> <span class="n">uuid</span><span class="p">),</span> <span class="kc">None</span><span class="p">)</span>
+            <span class="n">tiles</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">ts</span><span class="o">.</span><span class="n">tiles</span><span class="p">(</span><span class="n">tids</span><span class="p">))</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="p">{</span><span class="n">tid</span><span class="p">:</span> <span class="n">tval</span> <span class="k">for</span> <span class="n">tid</span><span class="p">,</span> <span class="n">tval</span> <span class="ow">in</span> <span class="n">tiles</span><span class="p">}</span>
+        <span class="k">return</span> <span class="n">jsonify</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+
+    <span class="n">logging</span><span class="o">.</span><span class="n">basicConfig</span><span class="p">(</span>
+        <span class="n">level</span><span class="o">=</span><span class="n">log_level</span><span class="p">,</span>
+        <span class="n">filename</span><span class="o">=</span><span class="n">log_file</span><span class="p">,</span>
+        <span class="nb">format</span><span class="o">=</span><span class="s1">&#39;[</span><span class="si">%(asctime)s</span><span class="s1">] </span><span class="si">%(levelname)s</span><span class="s1"> in </span><span class="si">%(module)s</span><span class="s1">: </span><span class="si">%(message)s</span><span class="s1">&#39;</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">app</span>
+
+
+<span class="k">class</span> <span class="nc">ServerError</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
+    <span class="k">pass</span>
+
+
+<span class="k">def</span> <span class="nf">get_open_port</span><span class="p">():</span>
+    <span class="n">s</span> <span class="o">=</span> <span class="n">socket</span><span class="o">.</span><span class="n">socket</span><span class="p">(</span><span class="n">socket</span><span class="o">.</span><span class="n">AF_INET</span><span class="p">,</span> <span class="n">socket</span><span class="o">.</span><span class="n">SOCK_STREAM</span><span class="p">)</span>
+    <span class="n">s</span><span class="o">.</span><span class="n">bind</span><span class="p">((</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
+    <span class="n">s</span><span class="o">.</span><span class="n">listen</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+    <span class="n">port</span> <span class="o">=</span> <span class="n">s</span><span class="o">.</span><span class="n">getsockname</span><span class="p">()[</span><span class="mi">1</span><span class="p">]</span>
+    <span class="n">s</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">port</span>
+
+
+<span class="k">class</span> <span class="nc">FuseProcess</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tmp_dir</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">tmp_dir</span> <span class="o">=</span> <span class="n">tmp_dir</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">http_directory</span> <span class="o">=</span> <span class="n">op</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">tmp_dir</span><span class="p">,</span> <span class="s1">&#39;http&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">https_directory</span> <span class="o">=</span> <span class="n">op</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">tmp_dir</span><span class="p">,</span> <span class="s1">&#39;https&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">diskcache_directory</span> <span class="o">=</span> <span class="n">op</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">tmp_dir</span><span class="p">,</span> <span class="s1">&#39;dc&#39;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">setup</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Set up filesystem in user space for http and https</span>
+<span class="sd">        so that we can retrieve tiles from remote sources.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        tmp_dir: string</span>
+<span class="sd">            The temporary directory where to create the</span>
+<span class="sd">            http and https directories</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="kn">from</span> <span class="nn">simple_httpfs</span> <span class="k">import</span> <span class="n">HttpFs</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">op</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">http_directory</span><span class="p">):</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">http_directory</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">op</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">https_directory</span><span class="p">):</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">https_directory</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">op</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">diskcache_directory</span><span class="p">):</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">diskcache_directory</span><span class="p">)</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">sh</span><span class="o">.</span><span class="n">umount</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">http_directory</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">ex</span><span class="p">:</span>
+            <span class="k">pass</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">sh</span><span class="o">.</span><span class="n">umount</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">https_directory</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">ex</span><span class="p">:</span>
+            <span class="k">pass</span>
+
+        <span class="n">disk_cache_size</span> <span class="o">=</span> <span class="mi">2</span><span class="o">**</span><span class="mi">25</span>
+        <span class="n">disk_cache_dir</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">diskcache_directory</span>
+        <span class="n">lru_capacity</span> <span class="o">=</span> <span class="mi">400</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;self.diskcache_directory&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">diskcache_directory</span><span class="p">,</span> <span class="n">op</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">diskcache_directory</span><span class="p">))</span>
+
+        <span class="k">def</span> <span class="nf">start_fuse</span><span class="p">(</span><span class="n">directory</span><span class="p">):</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;starting fuse&quot;</span><span class="p">)</span>
+            <span class="n">fuse</span> <span class="o">=</span> <span class="n">FUSE</span><span class="p">(</span>
+                <span class="n">HttpFs</span><span class="p">(</span><span class="s1">&#39;http&#39;</span><span class="p">,</span>
+                       <span class="n">disk_cache_size</span><span class="o">=</span><span class="n">disk_cache_size</span><span class="p">,</span>
+                       <span class="n">disk_cache_dir</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">diskcache_directory</span><span class="p">,</span>
+                       <span class="n">lru_capacity</span><span class="o">=</span><span class="n">lru_capacity</span><span class="p">,</span>
+                    <span class="p">),</span>
+                <span class="n">directory</span><span class="p">,</span>
+                <span class="n">foreground</span><span class="o">=</span><span class="kc">False</span>
+            <span class="p">)</span>
+
+        <span class="n">proc</span> <span class="o">=</span> <span class="n">mp</span><span class="o">.</span><span class="n">Process</span><span class="p">(</span><span class="n">target</span><span class="o">=</span><span class="n">start_fuse</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">http_directory</span><span class="p">])</span>
+        <span class="n">proc</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+        <span class="n">proc</span><span class="o">.</span><span class="n">join</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">teardown</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">sh</span><span class="o">.</span><span class="n">umount</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">http_directory</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">ex</span><span class="p">:</span>
+            <span class="k">pass</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">sh</span><span class="o">.</span><span class="n">umount</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">https_directory</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">ex</span><span class="p">:</span>
+            <span class="k">pass</span>
+
+
+<div class="viewcode-block" id="Server"><a class="viewcode-back" href="../../python_api.html#higlass.server.Server">[docs]</a><span class="k">class</span> <span class="nc">Server</span><span class="p">:</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    A lightweight HiGlass server.</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="c1"># Keep track of the server processes that have been started.</span>
+    <span class="c1"># So that when someone says &#39;start&#39;, the old ones are terminated</span>
+    <span class="n">processes</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">diskcache_directory</span> <span class="o">=</span> <span class="s1">&#39;/tmp/hgflask/dc&#39;</span>
+
+<div class="viewcode-block" id="Server.__init__"><a class="viewcode-back" href="../../python_api.html#higlass.server.Server.__init__">[docs]</a>    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tilesets</span><span class="p">,</span> <span class="n">port</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">host</span><span class="o">=</span><span class="s1">&#39;localhost&#39;</span><span class="p">,</span> <span class="n">tmp_dir</span><span class="o">=</span><span class="s1">&#39;/tmp/hgflask&#39;</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Maintain a reference to a running higlass server</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        port: int</span>
+<span class="sd">            The port that this server will run on</span>
+<span class="sd">        tileset: []</span>
+<span class="sd">            A list of tilesets to serve (see higlass.tilesets)</span>
+<span class="sd">        host: string</span>
+<span class="sd">            The host this server is running on.  Usually just localhost</span>
+<span class="sd">        tmp_dir: string</span>
+<span class="sd">            A temporary directory into which to mount the http and https files</span>
+
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">tilesets</span> <span class="o">=</span> <span class="n">tilesets</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">host</span> <span class="o">=</span> <span class="n">host</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">port</span> <span class="o">=</span> <span class="n">port</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">tmp_dir</span> <span class="o">=</span> <span class="n">tmp_dir</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">file_ids</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">fuse_process</span> <span class="o">=</span> <span class="n">FuseProcess</span><span class="p">(</span><span class="n">tmp_dir</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fuse_process</span><span class="o">.</span><span class="n">setup</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="Server.start"><a class="viewcode-back" href="../../python_api.html#higlass.server.Server.start">[docs]</a>    <span class="k">def</span> <span class="nf">start</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">log_file</span><span class="o">=</span><span class="s1">&#39;/tmp/hgserver.log&#39;</span><span class="p">,</span> <span class="n">log_level</span><span class="o">=</span><span class="n">logging</span><span class="o">.</span><span class="n">INFO</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Start a lightweight higlass server.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        log_file: string</span>
+<span class="sd">            Where to place diagnostic log files</span>
+<span class="sd">        log_level: logging.*</span>
+<span class="sd">            What level to log at</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">puid</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">processes</span><span class="o">.</span><span class="n">keys</span><span class="p">()):</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;terminating:&quot;</span><span class="p">,</span> <span class="n">puid</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">processes</span><span class="p">[</span><span class="n">puid</span><span class="p">]</span><span class="o">.</span><span class="n">terminate</span><span class="p">()</span>
+            <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">processes</span><span class="p">[</span><span class="n">puid</span><span class="p">]</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">app</span> <span class="o">=</span> <span class="n">create_app</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">tilesets</span><span class="p">,</span>
+            <span class="vm">__name__</span><span class="p">,</span>
+            <span class="n">log_file</span><span class="o">=</span><span class="n">log_file</span><span class="p">,</span>
+            <span class="n">log_level</span><span class="o">=</span><span class="n">log_level</span><span class="p">,</span> 
+            <span class="n">file_ids</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">file_ids</span><span class="p">)</span>
+
+        <span class="c1"># we&#39;re going to assign a uuid to each server process so that if anything</span>
+        <span class="c1"># goes wrong, the variable referencing the process doesn&#39;t get lost</span>
+        <span class="n">uuid</span> <span class="o">=</span> <span class="n">slugid</span><span class="o">.</span><span class="n">nice</span><span class="p">()</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s1">&#39;utf8&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">port</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">port</span> <span class="o">=</span> <span class="n">get_open_port</span><span class="p">()</span>
+        <span class="n">target</span> <span class="o">=</span> <span class="n">partial</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">app</span><span class="o">.</span><span class="n">run</span><span class="p">,</span>
+                         <span class="n">threaded</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                         <span class="n">debug</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                         <span class="n">host</span><span class="o">=</span><span class="s1">&#39;0.0.0.0&#39;</span><span class="p">,</span>
+                         <span class="n">port</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">port</span><span class="p">,</span>
+                         <span class="n">use_reloader</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">processes</span><span class="p">[</span><span class="n">uuid</span><span class="p">]</span> <span class="o">=</span> <span class="n">mp</span><span class="o">.</span><span class="n">Process</span><span class="p">(</span><span class="n">target</span><span class="o">=</span><span class="n">target</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">processes</span><span class="p">[</span><span class="n">uuid</span><span class="p">]</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">connected</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="k">while</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">connected</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">url</span> <span class="o">=</span> <span class="s1">&#39;http://</span><span class="si">{}</span><span class="s1">:</span><span class="si">{}</span><span class="s1">/api/v1&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">host</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">port</span><span class="p">)</span>
+                <span class="n">r</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">head</span><span class="p">(</span><span class="n">url</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">r</span><span class="o">.</span><span class="n">ok</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">connected</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="k">except</span> <span class="n">requests</span><span class="o">.</span><span class="n">ConnectionError</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+                <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="o">.</span><span class="mi">2</span><span class="p">)</span></div>
+
+    <span class="k">def</span> <span class="nf">stop</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Stop this server so that the calling process can exit</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="c1"># unsetup_fuse()</span>
+        <span class="k">for</span> <span class="n">uuid</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">processes</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">processes</span><span class="p">[</span><span class="n">uuid</span><span class="p">]</span><span class="o">.</span><span class="n">terminate</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">tileset_info</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">uid</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Return the tileset info for the given tileset</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="n">url</span> <span class="o">=</span> <span class="s1">&#39;http://</span><span class="si">{host}</span><span class="s1">:</span><span class="si">{port}</span><span class="s1">/api/v1/tileset_info/?d=</span><span class="si">{uid}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+            <span class="n">host</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">host</span><span class="p">,</span>
+            <span class="n">port</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">port</span><span class="p">,</span>
+            <span class="n">uid</span><span class="o">=</span><span class="n">uid</span><span class="p">)</span>
+
+        <span class="n">req</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">url</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">req</span><span class="o">.</span><span class="n">status_code</span> <span class="o">!=</span> <span class="mi">200</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">ServerError</span><span class="p">(</span><span class="s1">&#39;Error fetching tileset_info:&#39;</span><span class="p">,</span> <span class="n">req</span><span class="o">.</span><span class="n">content</span><span class="p">)</span>
+
+        <span class="n">content</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">req</span><span class="o">.</span><span class="n">content</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">content</span><span class="p">[</span><span class="n">uid</span><span class="p">]</span>
+
+    <span class="k">def</span> <span class="nf">tiles</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">uid</span><span class="p">,</span> <span class="n">z</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Return tiles from the specified dataset (uid) at</span>
+<span class="sd">        the given position (z,x,[u])</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="n">tile_id</span> <span class="o">=</span><span class="s1">&#39;</span><span class="si">{uid}</span><span class="s1">.</span><span class="si">{z}</span><span class="s1">.</span><span class="si">{x}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">uid</span><span class="o">=</span><span class="n">uid</span><span class="p">,</span> <span class="n">z</span><span class="o">=</span><span class="n">z</span><span class="p">,</span> <span class="n">x</span><span class="o">=</span><span class="n">x</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">y</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">tile_id</span> <span class="o">+=</span> <span class="s1">&#39;.</span><span class="si">{y}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">y</span><span class="o">=</span><span class="n">y</span><span class="p">)</span>
+        <span class="n">url</span> <span class="o">=</span> <span class="s1">&#39;http://</span><span class="si">{host}</span><span class="s1">:</span><span class="si">{port}</span><span class="s1">/api/v1/tiles/?d=</span><span class="si">{tile_id}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+            <span class="n">host</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">host</span><span class="p">,</span>
+            <span class="n">port</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">port</span><span class="p">,</span>
+            <span class="n">tile_id</span><span class="o">=</span><span class="n">tile_id</span><span class="p">)</span>
+
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;url:&quot;</span><span class="p">,</span> <span class="n">url</span><span class="p">)</span>
+
+        <span class="n">req</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">url</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">req</span><span class="o">.</span><span class="n">status_code</span> <span class="o">!=</span> <span class="mi">200</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">ServerError</span><span class="p">(</span><span class="s1">&#39;Error fetching tile:&#39;</span><span class="p">,</span> <span class="n">req</span><span class="o">.</span><span class="n">content</span><span class="p">)</span>
+
+        <span class="n">content</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">req</span><span class="o">.</span><span class="n">content</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">content</span><span class="p">[</span><span class="n">tile_id</span><span class="p">]</span>
+
+    <span class="k">def</span> <span class="nf">chromsizes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">uid</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Return the chromosome sizes from the given filename</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="n">url</span> <span class="o">=</span> <span class="s1">&#39;http://</span><span class="si">{host}</span><span class="s1">:</span><span class="si">{port}</span><span class="s1">/api/v1/chrom-sizes/?id=</span><span class="si">{uid}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+            <span class="n">host</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">host</span><span class="p">,</span>
+            <span class="n">port</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">port</span><span class="p">,</span>
+            <span class="n">uid</span><span class="o">=</span><span class="n">uid</span><span class="p">)</span>
+
+        <span class="n">req</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">url</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">req</span><span class="o">.</span><span class="n">status_code</span> <span class="o">!=</span> <span class="mi">200</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">ServerError</span><span class="p">(</span><span class="s1">&#39;Error fetching chromsizes:&#39;</span><span class="p">,</span> <span class="n">req</span><span class="o">.</span><span class="n">content</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">req</span><span class="o">.</span><span class="n">content</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">api_address</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s1">&#39;http://</span><span class="si">{host}</span><span class="s1">:</span><span class="si">{port}</span><span class="s1">/api/v1&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+            <span class="n">host</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">host</span><span class="p">,</span>
+            <span class="n">port</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">port</span><span class="p">)</span></div>
+
+<span class="n">TMP_DIR</span><span class="o">=</span><span class="s1">&#39;/tmp/higlass-python/&#39;</span>
+
+<span class="n">fuse</span> <span class="o">=</span> <span class="n">FuseProcess</span><span class="p">(</span><span class="n">TMP_DIR</span><span class="p">)</span>
+<span class="n">fuse</span><span class="o">.</span><span class="n">setup</span><span class="p">()</span>
+</pre></div>
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../index.html">HiGlass</a></h1>
+
+
+
+
+
+
+
+
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../tutorial.html">Tutorial</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../tutorial.html#prerequisites">Prerequisites</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../tutorial.html#quickly-viewing-a-dataset">Quickly viewing a dataset</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../tutorial.html#running-higlass-locally">Running HiGlass locally</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../tutorial.html#adding-data">Adding data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../tutorial.html#viewing-data-in-the-client">Viewing data in the client</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../tutorial.html#creating-a-superuser">Creating a superuser</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../javascript_api.html">Javascript API</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../javascript_api.html#overview">Overview</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../javascript_api.html#api-functions">API Functions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../javascript_api.html#tiledpixitrack-functions">TiledPixiTrack Functions</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../python_api.html">Python API</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../python_api.html#higlass-server">higlass.server</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../python_api.html#higlass-client">higlass.client</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../jupyter.html">Jupyter Notebooks</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../jupyter.html#installation">Installation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../jupyter.html#usage">Usage</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../data_preparation.html">Data Preparation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../data_preparation.html#bed-files">Bed Files</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../data_preparation.html#bedpe-like-files">Bedpe-like Files</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../data_preparation.html#bedgraph-files">BedGraph files</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../data_preparation.html#bigwig-files">bigWig files</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../data_preparation.html#chromosome-sizes">Chromosome Sizes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../data_preparation.html#gene-annotation-tracks">Gene Annotation Tracks</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../data_preparation.html#hitile-files">Hitile files</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../data_preparation.html#cooler-files">Cooler files</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../data_preparation.html#multivec-files">Multivec Files</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../data_preparation.html#epilogos-data-multivec">Epilogos Data (multivec)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../data_preparation.html#other-data-multivec">Other Data (multivec)</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../track_types.html">Track Types</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../track_types.html#linking-value-scales">Linking value scales</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../track_types.html#bed-like">Bed-like</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../track_types.html#gene-annotations">Gene Annotations</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../track_types.html#heatmap">Heatmap</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../track_types.html#rotated-2d-heatmap">Rotated 2D Heatmap</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../track_types.html#d-rectangle-domain">2D Rectangle Domain</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../track_types.html#horizontal-2d-rectangle-domain">Horizontal 2D Rectangle Domain</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../track_types.html#line">Line</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../track_types.html#bar">Bar</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../track_types.html#point">Point</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../track_types.html#d-heatmap">1D Heatmap</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../track_types.html#chromosome-labels">Chromosome Labels</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../track_types.html#chromosome-grid">Chromosome Grid</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../track_types.html#stacked-bars">Stacked Bars</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../track_types.html#multiple-lines">Multiple Lines</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../track_types.html#multiple-bar-charts">Multiple Bar Charts</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../track_types.html#d-annotations">1D Annotations</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../views.html">Views</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../views.html#genome-position-search-box">Genome Position Search Box</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../views.html#view-synchronization">View synchronization</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../higlass_server.html">Server</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../higlass_server.html#configuration">Configuration</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../higlass_server.html#development">Development</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../higlass_server.html#testing">Testing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../higlass_server.html#api">API</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../higlass_docker.html">Docker</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../higlass_docker.html#running-locally">Running locally</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../higlass_docker.html#running-remotely">Running remotely</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../view_config.html">View Configs</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../view_config.html#show-a-specific-genomic-location">Show a specific genomic location</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../view_config.html#upload-a-viewconf-to-the-server">Upload a viewconf to the server</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../view_config.html#viewconf-structure">Viewconf Structure</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../view_config.html#views">Views</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../view_config.html#tracks">Tracks</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../view_config.html#overlay-tracks">Overlay Tracks</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../developer.html">Contributor Guidelines</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../index.html">Documentation overview</a><ul>
+  <li><a href="../index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2017,2018 HiGlass Authors.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.8.2</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

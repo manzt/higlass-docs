@@ -1,0 +1,382 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>Server &#8212; HiGlass v1.0 documentation</title>
+    <link rel="stylesheet" href="_static/higlass.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Docker" href="higlass_docker.html" />
+    <link rel="prev" title="Views" href="views.html" />
+  <!-- Global site tag (gtag.js) - Google Analytics -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=UA-77756807-1"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+
+    gtag('config', 'UA-77756807-1');
+  </script>
+  
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <div class="section" id="server">
+<h1>Server<a class="headerlink" href="#server" title="Permalink to this headline">¶</a></h1>
+<div class="toctree-wrapper compound">
+</div>
+<div class="section" id="configuration">
+<h2>Configuration<a class="headerlink" href="#configuration" title="Permalink to this headline">¶</a></h2>
+<p>The HiGlass server accepts a number of options to customize its use.
+Some of these options are set using environment variables before the
+server is started:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">export</span> <span class="nv">OPTION</span><span class="o">=</span>value<span class="p">;</span> python manage.py runserver
+</pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">BASE_DIR</span></code> - Set the Django base directory. This is where Django will
+look for the database and the media directories.</p>
+<p><code class="docutils literal notranslate"><span class="pre">REDIS_HOST</span></code> - The host name for the redis server to use for tile caching.  If
+it’s not specified, then no in-memory tile caching will be performed.</p>
+<p><code class="docutils literal notranslate"><span class="pre">REDIS_PORT</span></code> - The port for redis server to use for tile caching. If it’s not
+set and a host is provided, the default port will be used.</p>
+<p>Additionally, the following settings are set via <code class="docutils literal notranslate"><span class="pre">config.json</span></code> (see <code class="docutils literal notranslate"><span class="pre">config.json.sample</span></code> as an example):</p>
+<p><code class="docutils literal notranslate"><span class="pre">DEBUG</span></code> - If <code class="docutils literal notranslate"><span class="pre">true</span></code> the server is started in debug mode.</p>
+<p><code class="docutils literal notranslate"><span class="pre">INSTALLED_APPS</span></code> - A list of django extensions.</p>
+<p><code class="docutils literal notranslate"><span class="pre">LOG_LEVEL_CONSOLE</span></code> - Define the console log level.</p>
+<p><code class="docutils literal notranslate"><span class="pre">LOG_LEVEL_FILE</span></code> - Define the file log level.</p>
+<p><code class="docutils literal notranslate"><span class="pre">LOG_LEVEL_DJANGO</span></code> - Define the django log level.</p>
+<p><code class="docutils literal notranslate"><span class="pre">LOG_LEVEL_CHROMS</span></code> - Define the chroms log level.</p>
+<p><code class="docutils literal notranslate"><span class="pre">LOG_LEVEL_FRAGMENTS</span></code> - Define the fragments log level.</p>
+<p><code class="docutils literal notranslate"><span class="pre">LOG_LEVEL_TILESETS</span></code> - Define the tilesets log level.</p>
+<p><code class="docutils literal notranslate"><span class="pre">UPLOAD_ENABLED</span></code> - If <code class="docutils literal notranslate"><span class="pre">true</span></code> the HiGlass server accepts any kinds of uploads.</p>
+<p><code class="docutils literal notranslate"><span class="pre">PUBLIC_UPLOAD_ENABLED</span></code> - If <code class="docutils literal notranslate"><span class="pre">true</span></code> the HiGlass server accepts public uploads.</p>
+<p><code class="docutils literal notranslate"><span class="pre">REDIS_HOST</span></code> - IP address of your Redis server.</p>
+<p><code class="docutils literal notranslate"><span class="pre">REDIS_PORT</span></code> - Port number of your Redis server.</p>
+<p><code class="docutils literal notranslate"><span class="pre">SNIPPET_HIC_MAX_OUT_DIM</span></code> - If specified it limits the maximum size (in pixels) of the longer side of a Hi-C snippet.</p>
+<p><code class="docutils literal notranslate"><span class="pre">SNIPPET_HIC_MAX_DATA_DIM</span></code> - If specified it limits the maximum size (in bins) of the longer side of the snippet that is pulled out of a cooler file.</p>
+<p><code class="docutils literal notranslate"><span class="pre">SNIPPET_IMG_MAX_OUT_DIM</span></code> - If specified it limits the maximum size (in pixels) of the longer side of an image snippet.</p>
+<p><code class="docutils literal notranslate"><span class="pre">SNIPPET_OSM_MAX_DATA_DIM</span></code> - If specified it limits the maximum size (in pixels) of the longer side of the OSM tiles that are pulled out for getting the image snippet.</p>
+<p><code class="docutils literal notranslate"><span class="pre">SNIPPET_IMT_MAX_DATA_DIM</span></code> - If specified it limits the maximum size (in pixels) of the longer side of the image tiles that are pulled out for getting the image snippet.</p>
+</div>
+<div class="section" id="development">
+<h2>Development<a class="headerlink" href="#development" title="Permalink to this headline">¶</a></h2>
+<p>Running the server locally:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python manage.py runserver <span class="m">8000</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="testing">
+<h2>Testing<a class="headerlink" href="#testing" title="Permalink to this headline">¶</a></h2>
+<p>There are test in <code class="docutils literal notranslate"><span class="pre">tilesets/views.py</span></code> which can be run
+from the command line:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python manage.py <span class="nb">test</span> tilesets
+</pre></div>
+</div>
+<p>More specific tests can be run by specifying the class and function
+that contain the test:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python manage.py <span class="nb">test</span> tilesets.tests.CoolerTest.test_get_multi_tiles
+</pre></div>
+</div>
+<div class="section" id="chromosome-sizes">
+<h3>Chromosome sizes<a class="headerlink" href="#chromosome-sizes" title="Permalink to this headline">¶</a></h3>
+<p>Chromosome sizes specify the lengths of the chromosomes that make up an
+assembly. While they have no intrinsic biological order, HiGlass displays all
+chromosomes together on a line so the order of the entries in the file does
+have a meaning.</p>
+<p>They must be imported with the <cite>chromsizes-tsv</cite> filetype and <cite>chromsizes</cite>
+datatype to be properly recognized by the server and the API.</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>docker <span class="nb">exec</span> higlass-container python <span class="se">\</span>
+        higlass-server/manage.py ingest_tileset <span class="se">\</span>
+        --filename /tmp/chromsizes_hg19.tsv <span class="se">\</span>
+        --filetype chromsizes-tsv <span class="se">\</span>
+        --datatype chromsizes
+</pre></div>
+</div>
+<p>Or using curl:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>curl -u <span class="sb">`</span>cat ~/.higlass-server-login<span class="sb">`</span> <span class="se">\</span>
+    -F <span class="s2">&quot;datafile=@/Users/peter/projects/negspy/negspy/data/mm10/chromInfo.txt&quot;</span> <span class="se">\</span>
+    -F <span class="s2">&quot;filetype=chromsizes-tsv&quot;</span> <span class="se">\</span>
+    -F <span class="s2">&quot;datatype=chromsizes&quot;</span> <span class="se">\</span>
+    -F <span class="s2">&quot;coordSystem=mm10&quot;</span> <span class="se">\</span>
+    -F <span class="s2">&quot;name=Chromosomes (mm10)&quot;</span> <span class="se">\</span>
+    http://higlass.io/api/v1/tilesets/
+</pre></div>
+</div>
+<p>This should return a JSON object contain a UUID to confirm that the data has been
+added to the server:</p>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+   <span class="nt">&quot;uuid&quot;</span><span class="p">:</span><span class="s2">&quot;DRpJETNeTAShnhng6KhhXw&quot;</span><span class="p">,</span>
+   <span class="nt">&quot;datafile&quot;</span><span class="p">:</span><span class="s2">&quot;http://higlass.io/api/v1/tilesets/media/uploads/chromInfo_ui7zU3M.txt&quot;</span><span class="p">,</span>
+   <span class="nt">&quot;filetype&quot;</span><span class="p">:</span><span class="s2">&quot;chromsizes-tsv&quot;</span><span class="p">,</span>
+   <span class="nt">&quot;datatype&quot;</span><span class="p">:</span><span class="s2">&quot;chromsizes&quot;</span><span class="p">,</span>
+   <span class="nt">&quot;private&quot;</span><span class="p">:</span><span class="kc">false</span><span class="p">,</span>
+   <span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="s2">&quot;Chromosomes (mm10)&quot;</span><span class="p">,</span>
+   <span class="nt">&quot;coordSystem&quot;</span><span class="p">:</span><span class="s2">&quot;mm10&quot;</span><span class="p">,</span>
+   <span class="nt">&quot;coordSystem2&quot;</span><span class="p">:</span><span class="s2">&quot;&quot;</span><span class="p">,</span>
+   <span class="nt">&quot;created&quot;</span><span class="p">:</span><span class="s2">&quot;2017-08-10T18:44:40.369924Z&quot;</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="api">
+<h2>API<a class="headerlink" href="#api" title="Permalink to this headline">¶</a></h2>
+<p>Retrieving a list of available tilesets:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>curl localhost:8000/api/v1/tilesets
+</pre></div>
+</div>
+<p>To filter by a specific filetype, use the <cite>t=filetype</cite> parameter:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>curl localhost:8000/api/v1/tilesets?t<span class="o">=</span>cooler
+</pre></div>
+</div>
+<p>To filter by datatype, use the <cite>dt=datatype</cite> parameter:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>curl localhost:8000/api/v1/tilesets?dt<span class="o">=</span>matrix
+</pre></div>
+</div>
+<p>Retrieving properties of a tileset, for a specific <cite>uuid</cite>:</p>
+<blockquote>
+<div><div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>curl localhost:8000/api/v1/tilesets/<span class="si">${</span><span class="nv">uuid</span><span class="si">}</span>/
+</pre></div>
+</div>
+</div></blockquote>
+<p>To delete a tileset, specify the tileset <cite>uuid</cite> in the URL, and use the <cite>DELETE</cite> method with authentication credentials:</p>
+<blockquote>
+<div><div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>curl --user <span class="si">${</span><span class="nv">username</span><span class="si">}</span>:<span class="si">${</span><span class="nv">password</span><span class="si">}</span> --request DELETE http://localhost:8000/api/v1/tilesets/<span class="si">${</span><span class="nv">uuid</span><span class="si">}</span>/
+</pre></div>
+</div>
+</div></blockquote>
+<p>To modify a tileset name, specify the tileset <cite>uuid</cite> in the URL, use the <cite>PATCH</cite> method with authentication credentials, and specify the new name in the JSON object passed to the request:</p>
+<blockquote>
+<div><div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>curl --user <span class="si">${</span><span class="nv">username</span><span class="si">}</span>:<span class="si">${</span><span class="nv">password</span><span class="si">}</span> --request PATCH --header <span class="s2">&quot;Content-Type: application/json&quot;</span> --data <span class="s1">&#39;{&quot;name&quot;:&quot;new_name_of_tileset&quot;}&#39;</span> http://localhost:8000/api/v1/tilesets/<span class="si">${</span><span class="nv">uuid</span><span class="si">}</span>/
+</pre></div>
+</div>
+</div></blockquote>
+<div class="section" id="management-commands">
+<h3>Management commands<a class="headerlink" href="#management-commands" title="Permalink to this headline">¶</a></h3>
+<p>The following commands may be run while logged into a non-Docker HiGlass
+instance and offer functionality to list and manipulate tileset records.</p>
+<p>Ingesting data:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python manage.py ingest_tileset --filename my.cool --filetype cooler --datatype matrix <span class="se">\</span>
+  --project-name <span class="s2">&quot;Experiment 3&quot;</span> --coordSystem hg19
+</pre></div>
+</div>
+<p>Use the filename parameter to indicate where the data file resides, the filetype to tell
+the server how to read the data, the datatype to tell the client how it can be displayed,
+the coordinate system to indicate which chromosome sizes to use, and the project name to
+group it with other tilesets (available in v1.3.0 and above).</p>
+<p>To retrieve a list of available tilesets:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python manage.py list_tilesets
+</pre></div>
+</div>
+<p>To modify the name of a tileset:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python manage.py modify_tileset --uuid<span class="o">=</span><span class="si">${</span><span class="nv">uuid</span><span class="si">}</span> --name<span class="o">=</span><span class="si">${</span><span class="nv">name</span><span class="si">}</span>
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p>At this time, the <cite>modify_tileset</cite> command only provides the ability to modify the tileset name. Future revisions may provide logic to modify other tileset fields.</p>
+<p class="last">To delete a tileset:</p>
+</div>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python manage.py delete_tileset --uuid<span class="o">=</span><span class="si">${</span><span class="nv">uuid</span><span class="si">}</span>
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">The <cite>delete_tileset</cite> command will delete the tileset record from the database backend. It will also delete the underlying file from the HiGlass server’s <cite>media/uploads</cite> folder, and fail if this file cannot be removed.</p>
+</div>
+</div>
+<div class="section" id="id1">
+<h3>Testing<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h3>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python manage.py <span class="nb">test</span> tilesets --failfast
+</pre></div>
+</div>
+<p>Or to test a more specific code block:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python manage.py <span class="nb">test</span> tilesets.tests.CoolerTest.test_transforms --failfast
+</pre></div>
+</div>
+<p>Tests of deletion and modification routes:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python manage.py <span class="nb">test</span> tilesets.tests.PermissionsTest
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="index.html">HiGlass</a></h1>
+
+
+
+
+
+
+
+
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="tutorial.html">Tutorial</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="tutorial.html#prerequisites">Prerequisites</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tutorial.html#quickly-viewing-a-dataset">Quickly viewing a dataset</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tutorial.html#running-higlass-locally">Running HiGlass locally</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tutorial.html#adding-data">Adding data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tutorial.html#viewing-data-in-the-client">Viewing data in the client</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tutorial.html#creating-a-superuser">Creating a superuser</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="javascript_api.html">Javascript API</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="javascript_api.html#overview">Overview</a></li>
+<li class="toctree-l2"><a class="reference internal" href="javascript_api.html#api-functions">API Functions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="javascript_api.html#tiledpixitrack-functions">TiledPixiTrack Functions</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="python_api.html">Python API</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="python_api.html#higlass-server">higlass.server</a></li>
+<li class="toctree-l2"><a class="reference internal" href="python_api.html#higlass-client">higlass.client</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="jupyter.html">Jupyter Notebooks</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="jupyter.html#installation">Installation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="jupyter.html#usage">Usage</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="data_preparation.html">Data Preparation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="data_preparation.html#bed-files">Bed Files</a></li>
+<li class="toctree-l2"><a class="reference internal" href="data_preparation.html#bedpe-like-files">Bedpe-like Files</a></li>
+<li class="toctree-l2"><a class="reference internal" href="data_preparation.html#bedgraph-files">BedGraph files</a></li>
+<li class="toctree-l2"><a class="reference internal" href="data_preparation.html#bigwig-files">bigWig files</a></li>
+<li class="toctree-l2"><a class="reference internal" href="data_preparation.html#chromosome-sizes">Chromosome Sizes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="data_preparation.html#gene-annotation-tracks">Gene Annotation Tracks</a></li>
+<li class="toctree-l2"><a class="reference internal" href="data_preparation.html#hitile-files">Hitile files</a></li>
+<li class="toctree-l2"><a class="reference internal" href="data_preparation.html#cooler-files">Cooler files</a></li>
+<li class="toctree-l2"><a class="reference internal" href="data_preparation.html#multivec-files">Multivec Files</a></li>
+<li class="toctree-l2"><a class="reference internal" href="data_preparation.html#epilogos-data-multivec">Epilogos Data (multivec)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="data_preparation.html#other-data-multivec">Other Data (multivec)</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="track_types.html">Track Types</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="track_types.html#linking-value-scales">Linking value scales</a></li>
+<li class="toctree-l2"><a class="reference internal" href="track_types.html#bed-like">Bed-like</a></li>
+<li class="toctree-l2"><a class="reference internal" href="track_types.html#gene-annotations">Gene Annotations</a></li>
+<li class="toctree-l2"><a class="reference internal" href="track_types.html#heatmap">Heatmap</a></li>
+<li class="toctree-l2"><a class="reference internal" href="track_types.html#rotated-2d-heatmap">Rotated 2D Heatmap</a></li>
+<li class="toctree-l2"><a class="reference internal" href="track_types.html#d-rectangle-domain">2D Rectangle Domain</a></li>
+<li class="toctree-l2"><a class="reference internal" href="track_types.html#horizontal-2d-rectangle-domain">Horizontal 2D Rectangle Domain</a></li>
+<li class="toctree-l2"><a class="reference internal" href="track_types.html#line">Line</a></li>
+<li class="toctree-l2"><a class="reference internal" href="track_types.html#bar">Bar</a></li>
+<li class="toctree-l2"><a class="reference internal" href="track_types.html#point">Point</a></li>
+<li class="toctree-l2"><a class="reference internal" href="track_types.html#d-heatmap">1D Heatmap</a></li>
+<li class="toctree-l2"><a class="reference internal" href="track_types.html#chromosome-labels">Chromosome Labels</a></li>
+<li class="toctree-l2"><a class="reference internal" href="track_types.html#chromosome-grid">Chromosome Grid</a></li>
+<li class="toctree-l2"><a class="reference internal" href="track_types.html#stacked-bars">Stacked Bars</a></li>
+<li class="toctree-l2"><a class="reference internal" href="track_types.html#multiple-lines">Multiple Lines</a></li>
+<li class="toctree-l2"><a class="reference internal" href="track_types.html#multiple-bar-charts">Multiple Bar Charts</a></li>
+<li class="toctree-l2"><a class="reference internal" href="track_types.html#d-annotations">1D Annotations</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="views.html">Views</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="views.html#genome-position-search-box">Genome Position Search Box</a></li>
+<li class="toctree-l2"><a class="reference internal" href="views.html#view-synchronization">View synchronization</a></li>
+</ul>
+</li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Server</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#configuration">Configuration</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#development">Development</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#testing">Testing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#api">API</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="higlass_docker.html">Docker</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="higlass_docker.html#running-locally">Running locally</a></li>
+<li class="toctree-l2"><a class="reference internal" href="higlass_docker.html#running-remotely">Running remotely</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="view_config.html">View Configs</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="view_config.html#show-a-specific-genomic-location">Show a specific genomic location</a></li>
+<li class="toctree-l2"><a class="reference internal" href="view_config.html#upload-a-viewconf-to-the-server">Upload a viewconf to the server</a></li>
+<li class="toctree-l2"><a class="reference internal" href="view_config.html#viewconf-structure">Viewconf Structure</a></li>
+<li class="toctree-l2"><a class="reference internal" href="view_config.html#views">Views</a></li>
+<li class="toctree-l2"><a class="reference internal" href="view_config.html#tracks">Tracks</a></li>
+<li class="toctree-l2"><a class="reference internal" href="view_config.html#overlay-tracks">Overlay Tracks</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="developer.html">Contributor Guidelines</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="views.html" title="previous chapter">Views</a></li>
+      <li>Next: <a href="higlass_docker.html" title="next chapter">Docker</a></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2017,2018 HiGlass Authors.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.8.2</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="_sources/higlass_server.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>
