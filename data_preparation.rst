@@ -652,7 +652,7 @@ example of a dataset grouped into two "segments".
     segment1    20000
     segment2    40000
 
-Data will be displayed as if the segments were laid out end to end:: 
+Data will be displayed as if the segments were laid out end to end: 
 
 .. code-block:: bash
 
